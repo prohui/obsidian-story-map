@@ -4,7 +4,7 @@
 
 在 Obsidian 中规划用户旅程、拆分用户故事和安排发布里程碑。地图保存在你的 Vault 中，故事卡可以关联 Markdown 笔记，也可以导出为 XMind 脑图。
 
-**[下载 1.0.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.0)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
+**[下载 1.0.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.1)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
 
 ![Obsidian 中的故事地图：活动、任务、发布里程碑、角色标签与右侧故事详情](docs/images/obsidian-zh.png)
 
@@ -24,6 +24,8 @@
 - 本地自动保存，显示保存状态，失败可重试；读取失败时暂停写入保护原文件。
 
 ## 安装
+
+需要 Obsidian 1.8.10 或更新版本。
 
 1. 从 [Releases](https://github.com/prohui/obsidian-story-map/releases/latest) 下载 ZIP，或分别下载 `main.js`、`manifest.json` 和 `styles.css`。
 2. 在 Vault 中创建 `.obsidian/plugins/story-map/`，放入上述三个文件。
@@ -57,7 +59,7 @@ npm ci
 npm test
 ```
 
-`npm test` 执行 TypeScript 检查、生产构建和回归测试。`npm run dev` 启动构建监听。将构建后的三个插件文件复制到测试 Vault 即可运行。
+`npm test` 执行 Obsidian 官方规范检查、TypeScript 检查、生产构建和回归测试。`npm run lint` 可单独运行规范检查，`npm run dev` 启动构建监听。将构建后的三个插件文件复制到测试 Vault 即可运行。
 
 翻译集中在 `src/i18n.ts`，通过占位符插入动态值，避免改写用户内容。欢迎提交翻译或功能改进。反馈问题时请附 Obsidian 版本、操作步骤和不含私人数据的示例。
 

@@ -4,7 +4,7 @@ English · [简体中文](README.md)
 
 Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
 
-**[Download 1.0.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.0.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.1)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
 ![Story Map running in Obsidian with activities, tasks, milestone lanes, role labels, and the story details panel](docs/images/obsidian-en.png)
 
@@ -24,6 +24,8 @@ Plan user journeys, organize stories, and define release milestones inside Obsid
 - Local saving with status, retry, and protection against overwriting unreadable data.
 
 ## Install
+
+Requires Obsidian 1.8.10 or newer.
 
 1. Download the ZIP from [Releases](https://github.com/prohui/obsidian-story-map/releases/latest), or download `main.js`, `manifest.json`, and `styles.css` individually.
 2. Create `.obsidian/plugins/story-map/` in your vault and place the three files there.
@@ -57,7 +59,7 @@ npm ci
 npm test
 ```
 
-Tests include TypeScript checks, production bundling, persistence regression tests, localization, and XMind structure checks. `npm run dev` watches for changes. Copy the built plugin files into a test vault to run it.
+Tests include official Obsidian lint rules, TypeScript checks, production bundling, persistence regression tests, localization, and XMind structure checks. `npm run lint` runs the guidelines check separately. `npm run dev` watches for changes. Copy the built plugin files into a test vault to run it.
 
 Translations are centralized in `src/i18n.ts`. User values are interpolated without modification. Contributions and additional translations are welcome. Include your Obsidian version, reproduction steps, and a non-private example when reporting an issue.
 
