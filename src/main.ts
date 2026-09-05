@@ -2,16 +2,47 @@ import { ItemView, Menu, Modal, Notice, Plugin, TFile, WorkspaceLeaf, normalizeP
 import { t, setLocale, isLanguage, languageNames, type Language } from "./i18n";
 import { strToU8, zipSync } from "fflate";
 import { createSampleMap } from "./sample";
+import { renderMap, canvasBytes, imagePdf, type ExportFormat } from "./export";
 import type { Activity, Release, Story, StoryMapData, Task } from "./types";
 
 const VIEW_TYPE = "story-map-view";
 const DATA_PATH = ".story-map.json";
-const PLUGIN_VERSION = "1.1.0";
+const PLUGIN_VERSION = "1.2.0";
 const STATUS_LABELS: Record<Story["status"], string> = { idea: "想法", planned: "已规划", doing: "进行中", done: "已完成" };
 const PRIORITY_LABELS: Record<Story["priority"], string> = { low: "低", medium: "中", high: "高" };
 
 function cloneDefault(): StoryMapData { return createSampleMap(); }
 function uid(prefix: string): string { return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`; }
+
+class ExportModal extends Modal {
+  constructor(private plugin: StoryMapPlugin) { super(plugin.app); }
+  onOpen(): void {
+    const content = this.contentEl;
+    content.addClass("story-map-modal");
+    content.createEl("h2", { text: t("导出地图") });
+    const label = content.createEl("label", { text: t("导出格式") });
+    const select = label.createEl("select", { cls: "story-map-export-format" });
+    const formats: ExportFormat[] = ["png", "pdf", "xmind", "json"];
+    formats.forEach(format => select.createEl("option", { value: format, text: format === "xmind" ? "XMind (.xmind)" : `${format.toUpperCase()} (.${format})` }));
+    const descriptions: Record<ExportFormat, string> = { png: "PNG：完整地图图片，适合分享和插入文档。", pdf: "PDF：单页地图图片，适合分享和打印，文字不可搜索。", xmind: "XMind：可继续编辑的脑图，包含用户旅程、里程碑和角色。", json: "JSON：完整地图数据备份；暂不提供导入界面。" };
+    const help = content.createEl("p");
+    const refresh = () => { help.setText(t(descriptions[select.value as ExportFormat])); };
+    select.onchange = refresh; refresh();
+    content.createEl("p", { text: t("导出完整地图，不受搜索、筛选或缩放影响。"), cls: "story-map-modal-help" });
+    content.createEl("p", { text: t("保存到库内文件夹：{0}，同名文件自动编号。", t("故事地图导出")), cls: "story-map-modal-help" });
+    const error = content.createEl("p", { attr: { role: "alert" } });
+    const actions = content.createDiv("story-map-modal-actions");
+    actions.createEl("button", { text: t("取消") }).onclick = () => this.close();
+    const button = actions.createEl("button", { text: t("导出"), cls: "mod-cta" });
+    button.onclick = () => {
+      button.disabled = true; select.disabled = true; button.setText(t("正在导出…")); error.empty();
+      void this.plugin.exportMap(select.value as ExportFormat, content.ownerDocument).then(() => this.close()).catch((cause: unknown) => {
+        error.setText(t("导出失败：{0}", cause instanceof Error ? cause.message : String(cause)));
+      }).finally(() => { button.disabled = false; select.disabled = false; button.setText(t("导出")); });
+    };
+  }
+  onClose(): void { this.contentEl.empty(); }
+}
 
 class NameModal extends Modal {
   constructor(private plugin: StoryMapPlugin, private heading: string, private label: string, private initialValue: string, private saveValue: (value: string) => void) { super(plugin.app); }
@@ -199,7 +230,7 @@ class StoryMapView extends ItemView {
     this.iconButton(toolbar, "redo-2", t("重做"), () => this.plugin.redo());
     this.iconButton(toolbar, "users", t("角色管理"), () => new RoleManagerModal(this.plugin).open());
     this.iconButton(toolbar, "flag", t("里程碑管理"), () => new MilestoneManagerModal(this.plugin).open());
-    this.iconButton(toolbar, "download", t("导出 XMind"), () => void this.plugin.exportXMind());
+    this.iconButton(toolbar, "download", t("导出"), () => new ExportModal(this.plugin).open());
     toolbar.createSpan({ text: `${Math.round(data.zoom * 100)}%`, cls: "story-map-zoom-label" });
     this.iconButton(toolbar, "minus", t("缩小"), () => { data.zoom = Math.max(.6, data.zoom - .1); void this.plugin.commit(); });
     this.iconButton(toolbar, "plus", t("放大"), () => { data.zoom = Math.min(1.5, data.zoom + .1); void this.plugin.commit(); });
@@ -504,6 +535,34 @@ export default class StoryMapPlugin extends Plugin {
   undo(): void { const previous = this.history.pop(); if (!previous) return; this.future.push(JSON.stringify(this.data)); this.data = JSON.parse(previous) as StoryMapData; void this.commit(false); }
   redo(): void { const next = this.future.pop(); if (!next) return; this.history.push(JSON.stringify(this.data)); this.data = JSON.parse(next) as StoryMapData; void this.commit(false); }
   private refresh(): void { this.app.workspace.getLeavesOfType(VIEW_TYPE).forEach(leaf => { const view = leaf.view; if (view instanceof StoryMapView) view.render(); }); }
+  async exportMap(format: ExportFormat, doc: Document): Promise<void> {
+    if (format === "xmind") { await this.exportXMind(); return; }
+    const data = JSON.parse(JSON.stringify(this.data)) as StoryMapData;
+    let output: ArrayBuffer;
+    if (format === "json") output = new TextEncoder().encode(JSON.stringify(data, null, 2) + "\n").buffer;
+    else if (format === "png" || format === "pdf") {
+      const canvas = await renderMap(data, doc);
+      try {
+        output = format === "png" ? await canvasBytes(canvas, "image/png") : imagePdf(new Uint8Array(await canvasBytes(canvas, "image/jpeg")), canvas.width, canvas.height);
+      } finally { canvas.width = 0; canvas.height = 0; }
+    } else throw new Error(t("不支持的导出格式"));
+    const path = await this.saveExport(data.title, format, output);
+    new Notice(t("已导出：{0}", path), 6000);
+  }
+  private exportQueue: Promise<unknown> = Promise.resolve();
+  private saveExport(title: string, format: ExportFormat, output: ArrayBuffer): Promise<string> {
+    const folder = t("故事地图导出");
+    const write = this.exportQueue.catch(() => undefined).then(async () => {
+      if (!(await this.app.vault.adapter.exists(folder))) await this.app.vault.createFolder(folder);
+      const safeTitle = title.replace(/[\\/:*?"<>|]/g, "-").trim() || t("用户故事地图");
+      let path = normalizePath(`${folder}/${safeTitle}.${format}`); let sequence = 2;
+      while (await this.app.vault.adapter.exists(path)) { path = normalizePath(`${folder}/${safeTitle}-${sequence}.${format}`); sequence += 1; }
+      await this.app.vault.adapter.writeBinary(path, output);
+      return path;
+    });
+    this.exportQueue = write;
+    return write;
+  }
   async exportXMind(): Promise<void> {
     const topic = (title: string, children: unknown[] = [], notes = "", labels: string[] = []): Record<string, unknown> => {
       const value: Record<string, unknown> = { id: uid("topic"), class: "topic", title };
@@ -542,11 +601,7 @@ export default class StoryMapPlugin extends Plugin {
     }, { level: 6 });
     const output = new ArrayBuffer(archive.byteLength);
     new Uint8Array(output).set(archive);
-    const folder = t("故事地图导出"); if (!(await this.app.vault.adapter.exists(folder))) await this.app.vault.createFolder(folder);
-    const safeTitle = this.data.title.replace(/[\\/:*?"<>|]/g, "-").trim() || t("用户故事地图");
-    let path = normalizePath(`${folder}/${safeTitle}.xmind`); let sequence = 2;
-    while (await this.app.vault.adapter.exists(path)) { path = normalizePath(`${folder}/${safeTitle}-${sequence}.xmind`); sequence += 1; }
-    await this.app.vault.adapter.writeBinary(path, output);
+    const path = await this.saveExport(this.data.title, "xmind", output);
     new Notice(t("已导出 XMind：{0}", path), 6000);
   }
   async openStoryNote(story: Story): Promise<void> {

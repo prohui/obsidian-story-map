@@ -1,5 +1,21 @@
 // Columns: source key, Traditional Chinese, Japanese, Korean, German, French, Spanish.
-const rows = `故事|故事|ストーリー|스토리|Story|Story|Historia
+const rows = `导出|匯出|エクスポート|내보내기|Exportieren|Exporter|Exportar
+导出地图|匯出地圖|マップをエクスポート|지도 내보내기|Map exportieren|Exporter la carte|Exportar mapa
+导出格式|匯出格式|出力形式|내보내기 형식|Exportformat|Format d’export|Formato de exportación
+正在导出…|正在匯出…|エクスポート中…|내보내는 중…|Wird exportiert…|Export en cours…|Exportando…
+已导出：{0}|已匯出：{0}|出力しました：{0}|내보내기 완료: {0}|Exportiert: {0}|Exporté : {0}|Exportado: {0}
+导出失败：{0}|匯出失敗：{0}|出力に失敗：{0}|내보내기 실패: {0}|Export fehlgeschlagen: {0}|Échec de l’export : {0}|Error al exportar: {0}
+PNG：完整地图图片，适合分享和插入文档。|PNG：完整地圖圖片，適合分享與插入文件。|PNG：共有や文書への挿入に適したマップ全体の画像。|PNG: 공유 및 문서 삽입용 전체 지도 이미지.|PNG: Vollständige Map als Bild zum Teilen und Einfügen in Dokumente.|PNG : image de la carte complète à partager ou à insérer dans un document.|PNG: imagen del mapa completo para compartir o insertar en documentos.
+PDF：单页地图图片，适合分享和打印，文字不可搜索。|PDF：單頁地圖圖片，適合分享與列印，文字無法搜尋。|PDF：共有・印刷用の1ページのマップ画像。文字検索はできません。|PDF: 공유 및 인쇄용 단일 페이지 지도 이미지. 텍스트 검색은 불가능합니다.|PDF: Einseitiges Map-Bild zum Teilen und Drucken. Text ist nicht durchsuchbar.|PDF : image de la carte sur une page, à partager ou imprimer. Texte non recherchable.|PDF: imagen del mapa en una página para compartir e imprimir. Texto no buscable.
+XMind：可继续编辑的脑图，包含用户旅程、里程碑和角色。|XMind：可繼續編輯的心智圖，包含使用者旅程、里程碑與角色。|XMind：ユーザージャーニー、マイルストーン、ロールを含む編集可能なマインドマップ。|XMind: 사용자 여정, 마일스톤, 역할이 포함된 편집 가능한 마인드맵.|XMind: Bearbeitbare Mindmap mit Nutzerreise, Meilensteinen und Rollen.|XMind : carte mentale modifiable avec parcours utilisateur, jalons et rôles.|XMind: mapa mental editable con recorrido del usuario, hitos y roles.
+JSON：完整地图数据备份；暂不提供导入界面。|JSON：完整地圖資料備份；暫不提供匯入介面。|JSON：マップデータの完全バックアップ。インポート画面は未対応です。|JSON: 전체 지도 데이터 백업. 가져오기 화면은 아직 제공되지 않습니다.|JSON: Vollständige Datensicherung. Eine Importoberfläche ist noch nicht verfügbar.|JSON : sauvegarde complète des données. Interface d’import non disponible pour le moment.|JSON: copia completa de los datos. La interfaz de importación aún no está disponible.
+导出完整地图，不受搜索、筛选或缩放影响。|匯出完整地圖，不受搜尋、篩選或縮放影響。|検索・フィルター・ズームに関係なくマップ全体を出力します。|검색, 필터, 확대 비율과 무관하게 전체 지도를 내보냅니다.|Exportiert die gesamte Map unabhängig von Suche, Filtern oder Zoom.|Exporte toute la carte, indépendamment de la recherche, des filtres ou du zoom.|Exporta el mapa completo sin aplicar búsquedas, filtros ni zoom.
+保存到库内文件夹：{0}，同名文件自动编号。|儲存至庫內資料夾：{0}，同名檔案自動編號。|保管庫内の {0} に保存。同名ファイルは連番で保持します。|보관함 폴더 {0}에 저장합니다. 동일한 이름은 번호를 붙여 보존합니다.|Speichert im Vault-Ordner {0}. Gleichnamige Dateien werden durch Nummerierung erhalten.|Enregistre dans le dossier {0} du coffre. Les fichiers existants sont préservés par numérotation.|Guarda en la carpeta {0} de la bóveda. Los archivos existentes se conservan mediante numeración.
+无法创建导出画布|無法建立匯出畫布|出力キャンバスを作成できません|내보내기 캔버스를 만들 수 없습니다|Exportfläche konnte nicht erstellt werden|Impossible de créer le canevas d’export|No se pudo crear el lienzo de exportación
+地图过大，请选择 XMind 或 JSON 导出|地圖過大，請選擇 XMind 或 JSON 匯出|マップが大きすぎます。XMind または JSON を選択してください|지도가 너무 큽니다. XMind 또는 JSON을 선택하세요|Map zu groß. Bitte XMind oder JSON wählen|Carte trop grande. Choisissez XMind ou JSON|Mapa demasiado grande. Elige XMind o JSON
+图像生成失败|圖片產生失敗|画像生成に失敗しました|이미지 생성 실패|Bilderzeugung fehlgeschlagen|Échec de la création de l’image|Error al generar la imagen
+不支持的导出格式|不支援的匯出格式|未対応の出力形式|지원하지 않는 내보내기 형식|Nicht unterstütztes Exportformat|Format d’export non pris en charge|Formato de exportación no compatible
+故事|故事|ストーリー|스토리|Story|Story|Historia
 想法|想法|アイデア|아이디어|Idee|Idée|Idea
 已规划|已規劃|計画済み|계획됨|Geplant|Planifié|Planificada
 进行中|進行中|進行中|진행 중|In Arbeit|En cours|En curso

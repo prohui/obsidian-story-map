@@ -4,7 +4,7 @@ English · [简体中文](README.zh-CN.md)
 
 Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
 
-**[Download 1.1.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.1.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.2.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.2.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
 ![Story Map running in Obsidian with activities, tasks, milestone lanes, role labels, and the story details panel](docs/images/obsidian-en.png)
 
@@ -20,7 +20,7 @@ Plan user journeys, organize stories, and define release milestones inside Obsid
 - Floating details: status, priority, estimate, tags, description, and linked Markdown notes.
 - Search, role filters, zoom, undo/redo, and preserved scroll position.
 - Eight interface languages: English, Simplified Chinese, Traditional Chinese, Japanese, Korean, German, French, and Spanish. Follow Obsidian automatically or choose manually.
-- XMind export with User journey, Release plan, and Roles branches. Story details appear in topic notes.
+- Export dialog with PNG, PDF, XMind and JSON formats. XMind includes User journey, Release plan and Roles branches, with story details in topic notes.
 - Local saving with status, retry, and protection against overwriting unreadable data.
 
 ## Install
@@ -40,7 +40,9 @@ Name the map, add activities, break them into tasks, and add stories within mile
 
 The toolbar language selector supports Follow Obsidian and all eight languages. Changes take effect immediately and persist across reloads. Unsupported host languages fall back to English; Traditional Chinese locales are detected separately. New and explicitly reset sample maps use the current language. Changing the interface language never translates or overwrites an existing map.
 
-Exported `.xmind` files go to a localized export folder in your vault, such as `Story Map Exports/` in English. Branch names and metadata labels follow the interface language; story content stays unchanged. Existing exports are preserved by numbering new files.
+Click the export arrow to choose a format, then confirm. PNG is a full-map image; PDF embeds that image on one page (text is not searchable); XMind is an editable mind map; JSON is a complete data backup (no import interface yet). PNG/PDF use a clean light layout showing all activities, tasks, milestones and story cards, without controls or the inspector. Search, filters and zoom never limit the exported data. Very large maps exceeding the visual export safety limit must use XMind or JSON.
+
+Files go to a localized folder in your vault, such as `Story Map Exports/` in English. Export labels follow the interface language; story content stays unchanged. Existing files are preserved by numbering new files. Export failures appear in the dialog and can be retried.
 
 ## Data and compatibility
 

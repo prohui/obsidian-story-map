@@ -8,7 +8,7 @@ function createPlugin(adapter = {}) {
   const notices = [];
   const context = {
     module: { exports: {} }, exports: {}, console, setTimeout, clearTimeout,
-    setImmediate, Uint8Array, ArrayBuffer,
+    setImmediate, Uint8Array, ArrayBuffer, TextEncoder,
     require: id => id === 'obsidian' ? {
       Plugin: class { async saveData() {} }, ItemView: class {}, Modal: class {},
       getLanguage: () => 'en',
@@ -22,6 +22,28 @@ function createPlugin(adapter = {}) {
   plugin.app = { vault: { adapter }, workspace: { getLeavesOfType: () => [] } };
   return { plugin, notices };
 }
+
+test('JSON export preserves full map data and numbers concurrent filenames', async () => {
+  const files = new Map();
+  const {plugin}=createPlugin({exists:async path=>path==='Story Map Exports'||files.has(path),writeBinary:async(path,bytes)=>files.set(path,Buffer.from(bytes).toString('utf8'))});
+  const original=JSON.stringify(plugin.data);
+  await Promise.all([plugin.exportMap('json',{}),plugin.exportMap('json',{})]);
+  assert.equal(files.size,2);
+  assert.ok([...files.keys()].some(path=>path.endsWith('-2.json')));
+  for(const content of files.values()) assert.deepEqual(JSON.parse(content),JSON.parse(original));
+  assert.equal(JSON.stringify(plugin.data),original);
+});
+
+test('failed export does not poison the next export or modify source data',async()=>{
+  let fail=true;
+  const {plugin}=createPlugin({exists:async()=>true,writeBinary:async()=>{}});
+  plugin.app.vault.adapter.exists=async path=>path==='Story Map Exports';
+  plugin.app.vault.adapter.writeBinary=async()=>{if(fail)throw Error('disk full');};
+  const original=JSON.stringify(plugin.data);
+  await assert.rejects(plugin.exportMap('json',{}),/disk full/);
+  fail=false;await plugin.exportMap('json',{});
+  assert.equal(JSON.stringify(plugin.data),original);
+});
 
 test('all eight languages initialize translated samples, export, and preserve existing data', async () => {
   const cases = { en: 'Account access journey', zh: '进入系统的用户旅程', 'zh-TW': '進入系統的使用者旅程', ja: 'システムアクセスのユーザージャーニー', ko: '시스템 접속 사용자 여정', de: 'Nutzerreise zum Systemzugang', fr: 'Parcours d’accès au compte', es: 'Recorrido de acceso a la cuenta' };

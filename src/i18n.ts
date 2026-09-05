@@ -17,6 +17,14 @@ export function setLocale(language: Language, hostLanguage = "en"): void {
 }
 
 export const english: Record<string, string> = {
+  "导出": "Export", "导出地图": "Export map", "导出格式": "Export format", "正在导出…": "Exporting…", "已导出：{0}": "Exported: {0}", "导出失败：{0}": "Export failed: {0}",
+  "PNG：完整地图图片，适合分享和插入文档。": "PNG: Full-map image for sharing and inserting into documents.",
+  "PDF：单页地图图片，适合分享和打印，文字不可搜索。": "PDF: Single-page map image for sharing and printing. Text is not searchable.",
+  "XMind：可继续编辑的脑图，包含用户旅程、里程碑和角色。": "XMind: Editable mind map with the user journey, milestones and roles.",
+  "JSON：完整地图数据备份；暂不提供导入界面。": "JSON: Complete map data backup. An import interface is not yet available.",
+  "导出完整地图，不受搜索、筛选或缩放影响。": "Exports the complete map, regardless of search, filters or zoom.",
+  "保存到库内文件夹：{0}，同名文件自动编号。": "Saved to vault folder: {0}. Existing files are preserved by numbering new files.",
+  "无法创建导出画布": "Could not create the export canvas", "地图过大，请选择 XMind 或 JSON 导出": "Map too large. Please export as XMind or JSON.", "图像生成失败": "Image generation failed", "不支持的导出格式": "Unsupported export format",
   "故事": "Story", "想法": "Idea", "已规划": "Planned", "进行中": "In progress", "已完成": "Done",
   "低": "Low", "中": "Medium", "高": "High", "取消": "Cancel", "保存": "Save",
   "添加 Activity": "Add Activity", "Activity 名称": "Activity name", "例如：进入系统": "e.g. Access the system",
