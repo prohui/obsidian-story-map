@@ -6,7 +6,7 @@ import type { Activity, Release, Story, StoryMapData, Task } from "./types";
 
 const VIEW_TYPE = "story-map-view";
 const DATA_PATH = ".story-map.json";
-const PLUGIN_VERSION = "1.0.1";
+const PLUGIN_VERSION = "1.0.2";
 const STATUS_LABELS: Record<Story["status"], string> = { idea: "想法", planned: "已规划", doing: "进行中", done: "已完成" };
 const PRIORITY_LABELS: Record<Story["priority"], string> = { low: "低", medium: "中", high: "高" };
 

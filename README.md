@@ -4,7 +4,7 @@
 
 在 Obsidian 中规划用户旅程、拆分用户故事和安排发布里程碑。地图保存在你的 Vault 中，故事卡可以关联 Markdown 笔记，也可以导出为 XMind 脑图。
 
-**[下载 1.0.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.1)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
+**[下载 1.0.2](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.2)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
 
 ![Obsidian 中的故事地图：活动、任务、发布里程碑、角色标签与右侧故事详情](docs/images/obsidian-zh.png)
 
@@ -29,7 +29,7 @@
 
 1. 从 [Releases](https://github.com/prohui/obsidian-story-map/releases/latest) 下载 ZIP，或分别下载 `main.js`、`manifest.json` 和 `styles.css`。
 2. 在 Vault 中创建 `.obsidian/plugins/story-map/`，放入上述三个文件。
-3. 在 Obsidian → 设置 → 第三方插件中启用“故事地图”。
+3. 在 Obsidian → 设置 → 第三方插件中启用“Story Map”。
 4. 点击左侧地图图标，或执行打开故事地图的命令。
 
 更新时替换上述三个文件，再禁用并重新启用插件。地图数据保存在插件目录之外。当前通过 GitHub 手动安装，尚未收录到 Obsidian 社区插件目录。
