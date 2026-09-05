@@ -1,5 +1,10 @@
 // Columns: source key, Traditional Chinese, Japanese, Korean, German, French, Spanish.
-const rows = `导出|匯出|エクスポート|내보내기|Exportieren|Exporter|Exportar
+const rows = `文件名|檔案名稱|ファイル名|파일 이름|Dateiname|Nom du fichier|Nombre del archivo
+保存位置|儲存位置|保存先|저장 위치|Speicherort|Emplacement|Ubicación
+系统另存为（桌面、下载或其他目录）|系統另存新檔（桌面、下載或其他目錄）|システムの名前を付けて保存（デスクトップなど）|시스템 다른 이름으로 저장 (바탕화면 등)|Systemdialog (Desktop, Downloads oder anderer Ordner)|Dialogue système (Bureau, Téléchargements ou autre dossier)|Diálogo del sistema (Escritorio, Descargas u otra carpeta)
+Obsidian 库内导出文件夹|Obsidian 庫內匯出資料夾|Obsidian 保管庫内の出力フォルダー|Obsidian 보관함 내 내보내기 폴더|Exportordner im Obsidian-Vault|Dossier d’export dans le coffre Obsidian|Carpeta de exportación en la bóveda Obsidian
+系统窗口可修改文件名和位置，并记住上次选择的目录；覆盖已有文件前会询问。|系統視窗可修改檔名與位置，並記住上次選擇的目錄；覆寫現有檔案前會詢問。|システム画面で名前と保存先を変更できます。前回のフォルダーを記憶し、上書き前に確認します。|시스템 창에서 이름과 위치를 변경할 수 있습니다. 마지막 폴더를 기억하고 덮어쓰기 전에 확인합니다.|Im Systemdialog können Name und Ort geändert werden. Er merkt sich den letzten Ordner und fragt vor dem Überschreiben.|Le dialogue système permet de changer le nom et l’emplacement, mémorise le dernier dossier et confirme tout remplacement.|El diálogo permite cambiar nombre y ubicación, recuerda la última carpeta y confirma antes de reemplazar archivos.
+导出|匯出|エクスポート|내보내기|Exportieren|Exporter|Exportar
 导出地图|匯出地圖|マップをエクスポート|지도 내보내기|Map exportieren|Exporter la carte|Exportar mapa
 导出格式|匯出格式|出力形式|내보내기 형식|Exportformat|Format d’export|Formato de exportación
 正在导出…|正在匯出…|エクスポート中…|내보내는 중…|Wird exportiert…|Export en cours…|Exportando…

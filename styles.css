@@ -56,6 +56,16 @@
 .story-map-status { display:flex; align-items:center; justify-content:space-between; padding:0 12px; border-top:1px solid var(--background-modifier-border); color:var(--text-muted); font-size:10px; background:var(--background-secondary); }
 .story-map-modal .story-map-form-row { display:grid; gap:5px; margin-bottom:14px; }.story-map-modal label{font-size:12px;color:var(--text-muted)}.story-map-modal input,.story-map-modal textarea{width:100%}.story-map-modal textarea{min-height:100px}.story-map-modal-actions{justify-content:flex-end;margin-top:20px}
 .story-map-modal-help { margin:-8px 0 16px; color:var(--text-muted); font-size:12px; }
+.story-map-export-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:24px 0; }
+.story-map-export-grid .story-map-export-card { display:flex; flex-direction:column; align-items:flex-start; gap:10px; height:auto; padding:18px; text-align:start; white-space:normal; background:var(--background-primary); border:1px solid var(--background-modifier-border); box-shadow:none; border-radius:12px; }
+.story-map-export-grid .story-map-export-card[aria-pressed="true"] { border-color:var(--interactive-accent); background:var(--background-secondary); box-shadow:inset 0 0 0 1px var(--interactive-accent); }
+.story-map-export-card:focus-visible { outline:2px solid var(--interactive-accent); outline-offset:3px; }
+.story-map-export-icon { color:var(--text-muted); }
+.story-map-export-card[aria-pressed="true"] .story-map-export-icon { color:var(--interactive-accent); }
+.story-map-export-title { font-size:16px; font-weight:600; }
+.story-map-export-description { font-size:12px; line-height:1.6; color:var(--text-muted); }
+.story-map-export-modal .story-map-modal-help { margin:12px 0; line-height:1.6; }
+@media (max-width:480px) { .story-map-export-grid { gap:8px; } .story-map-export-grid .story-map-export-card { padding:12px; } }
 .story-map-role-list { display:grid; gap:8px; }
 .story-map-role-row { display:grid; grid-template-columns:minmax(100px,.7fr) minmax(160px,1.5fr) auto; gap:8px; align-items:center; }
 .story-map-role-row button { color:var(--text-error); }

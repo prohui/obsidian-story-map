@@ -4,7 +4,7 @@
 
 在 Obsidian 中规划用户旅程、拆分用户故事和安排发布里程碑。地图保存在你的 Vault 中，故事卡可以关联 Markdown 笔记，也可以导出为 XMind 脑图。
 
-**[下载 1.2.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.2.0)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
+**[下载 1.3.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.3.0)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
 
 ![Obsidian 中的故事地图：活动、任务、发布里程碑、角色标签与右侧故事详情](docs/images/obsidian-zh.png)
 
@@ -42,7 +42,7 @@
 
 点击导出箭头后，先在弹窗选择格式，再确认导出。PNG 为完整地图图片；PDF 为单页图片式文件（文字不可搜索）；XMind 为可编辑脑图；JSON 为完整数据备份（暂未提供导入界面）。PNG/PDF 使用独立的浅色排版，包含全部活动、任务、里程碑和故事卡，不包含工具栏和详情面板。搜索、筛选与缩放不会限制导出内容。超出图片安全尺寸的大地图需使用 XMind 或 JSON。
 
-中文界面导出到库内 `故事地图导出/`，英文界面导出到 `Story Map Exports/`；已有文件自动编号保留。导出失败会在弹窗提示，可重试。
+选择格式卡片后，通过系统“另存为”设置文件名和位置，支持桌面、下载等库外目录。仅写入你选择的文件，取消不导出；系统负责覆盖确认及记住目录，插件记住上次成功导出的格式。不支持系统窗口时，中文界面保存到库内 `故事地图导出/`，英文界面保存到 `Story Map Exports/`，已有文件自动编号保留。导出失败会在弹窗提示，可重试。
 
 ## 数据与兼容性
 

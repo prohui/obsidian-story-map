@@ -3,11 +3,12 @@ import { t, setLocale, isLanguage, languageNames, type Language } from "./i18n";
 import { strToU8, zipSync } from "fflate";
 import { createSampleMap } from "./sample";
 import { renderMap, canvasBytes, imagePdf, type ExportFormat } from "./export";
+import { pickerWindow, pickExportFile, writeExportFile, exportFilename } from "./save-file";
 import type { Activity, Release, Story, StoryMapData, Task } from "./types";
 
 const VIEW_TYPE = "story-map-view";
 const DATA_PATH = ".story-map.json";
-const PLUGIN_VERSION = "1.2.0";
+const PLUGIN_VERSION = "1.3.0";
 const STATUS_LABELS: Record<Story["status"], string> = { idea: "想法", planned: "已规划", doing: "进行中", done: "已完成" };
 const PRIORITY_LABELS: Record<Story["priority"], string> = { low: "低", medium: "中", high: "高" };
 
@@ -18,27 +19,47 @@ class ExportModal extends Modal {
   constructor(private plugin: StoryMapPlugin) { super(plugin.app); }
   onOpen(): void {
     const content = this.contentEl;
-    content.addClass("story-map-modal");
+    content.addClass("story-map-modal", "story-map-export-modal");
     content.createEl("h2", { text: t("导出地图") });
-    const label = content.createEl("label", { text: t("导出格式") });
-    const select = label.createEl("select", { cls: "story-map-export-format" });
+    const grid = content.createDiv({ cls: "story-map-export-grid", attr: { role: "group", "aria-label": t("导出格式") } });
+    let selected = this.plugin.exportFormat;
     const formats: ExportFormat[] = ["png", "pdf", "xmind", "json"];
-    formats.forEach(format => select.createEl("option", { value: format, text: format === "xmind" ? "XMind (.xmind)" : `${format.toUpperCase()} (.${format})` }));
     const descriptions: Record<ExportFormat, string> = { png: "PNG：完整地图图片，适合分享和插入文档。", pdf: "PDF：单页地图图片，适合分享和打印，文字不可搜索。", xmind: "XMind：可继续编辑的脑图，包含用户旅程、里程碑和角色。", json: "JSON：完整地图数据备份；暂不提供导入界面。" };
-    const help = content.createEl("p");
-    const refresh = () => { help.setText(t(descriptions[select.value as ExportFormat])); };
-    select.onchange = refresh; refresh();
+    const cards: HTMLButtonElement[] = [];
+    const icons: Record<ExportFormat, string> = { png: "image", pdf: "file-text", xmind: "network", json: "braces" };
+    formats.forEach(format => {
+      const card = grid.createEl("button", { cls: "story-map-export-card", attr: { "data-format": format, "aria-pressed": String(selected === format) } });
+      cards.push(card);
+      setIcon(card.createSpan("story-map-export-icon"), icons[format]);
+      card.createSpan({ cls: "story-map-export-title", text: format === "xmind" ? "XMind" : format.toUpperCase() });
+      card.createSpan({ cls: "story-map-export-description", text: t(descriptions[format]).replace(/^[^：:]+[：:]\s*/, "") });
+      card.onclick = () => { selected = format; cards.forEach(item => item.setAttribute("aria-pressed", String(item === card))); };
+    });
+    const win = pickerWindow(content.ownerDocument);
+    if (!win?.showSaveFilePicker) content.createEl("p", { cls: "story-map-modal-help", text: t("保存到库内文件夹：{0}，同名文件自动编号。", t("故事地图导出")) });
     content.createEl("p", { text: t("导出完整地图，不受搜索、筛选或缩放影响。"), cls: "story-map-modal-help" });
-    content.createEl("p", { text: t("保存到库内文件夹：{0}，同名文件自动编号。", t("故事地图导出")), cls: "story-map-modal-help" });
     const error = content.createEl("p", { attr: { role: "alert" } });
     const actions = content.createDiv("story-map-modal-actions");
-    actions.createEl("button", { text: t("取消") }).onclick = () => this.close();
+    const cancel = actions.createEl("button", { text: t("取消") });
+    cancel.onclick = () => this.close();
     const button = actions.createEl("button", { text: t("导出"), cls: "mod-cta" });
     button.onclick = () => {
-      button.disabled = true; select.disabled = true; button.setText(t("正在导出…")); error.empty();
-      void this.plugin.exportMap(select.value as ExportFormat, content.ownerDocument).then(() => this.close()).catch((cause: unknown) => {
+      button.disabled = true; cancel.disabled = true; cards.forEach(card => card.disabled = true); button.setText(t("正在导出…")); error.empty();
+      const run = async (): Promise<boolean> => {
+        const format = selected;
+        const name = exportFilename(this.plugin.data.title, format);
+        if (win?.showSaveFilePicker) {
+          const handle = await pickExportFile(win, name, format);
+          if (!handle) return false;
+          await this.plugin.exportMap(format, content.ownerDocument, bytes => writeExportFile(handle, bytes));
+        } else await this.plugin.exportMap(format, content.ownerDocument, bytes => this.plugin.saveExport(name.replace(/\.[^.]+$/, ""), format, bytes));
+        this.plugin.exportFormat = format;
+        await this.plugin.savePreferences();
+        return true;
+      };
+      void run().then(saved => { if (saved) this.close(); }).catch((cause: unknown) => {
         error.setText(t("导出失败：{0}", cause instanceof Error ? cause.message : String(cause)));
-      }).finally(() => { button.disabled = false; select.disabled = false; button.setText(t("导出")); });
+      }).finally(() => { button.disabled = false; cancel.disabled = false; cards.forEach(card => card.disabled = false); button.setText(t("导出")); });
     };
   }
   onClose(): void { this.contentEl.empty(); }
@@ -463,6 +484,8 @@ class StoryMapView extends ItemView {
 
 export default class StoryMapPlugin extends Plugin {
   language: Language = "auto";
+  exportFormat: ExportFormat = "png";
+  async savePreferences(): Promise<void> { await this.saveData({ language: this.language, exportFormat: this.exportFormat }); }
   data: StoryMapData = cloneDefault();
   private history: string[] = [];
   private future: string[] = [];
@@ -476,10 +499,12 @@ export default class StoryMapPlugin extends Plugin {
     this.language = language;
     setLocale(language, this.hostLanguage());
     this.refresh();
-    try { await this.saveData({ language }); } catch { new Notice(t("语言设置保存失败")); }
+    try { await this.savePreferences(); } catch { new Notice(t("语言设置保存失败")); }
   }
   async onload(): Promise<void> {
     const settings: unknown = await this.loadData();
+    const format = settings && typeof settings === "object" && "exportFormat" in settings ? settings.exportFormat : undefined;
+    this.exportFormat = format === "pdf" || format === "xmind" || format === "json" ? format : "png";
     const language = settings && typeof settings === "object" && "language" in settings ? settings.language : undefined;
     this.language = isLanguage(language) ? language : "auto";
     setLocale(this.language, this.hostLanguage());
@@ -535,8 +560,8 @@ export default class StoryMapPlugin extends Plugin {
   undo(): void { const previous = this.history.pop(); if (!previous) return; this.future.push(JSON.stringify(this.data)); this.data = JSON.parse(previous) as StoryMapData; void this.commit(false); }
   redo(): void { const next = this.future.pop(); if (!next) return; this.history.push(JSON.stringify(this.data)); this.data = JSON.parse(next) as StoryMapData; void this.commit(false); }
   private refresh(): void { this.app.workspace.getLeavesOfType(VIEW_TYPE).forEach(leaf => { const view = leaf.view; if (view instanceof StoryMapView) view.render(); }); }
-  async exportMap(format: ExportFormat, doc: Document): Promise<void> {
-    if (format === "xmind") { await this.exportXMind(); return; }
+  async exportMap(format: ExportFormat, doc: Document, write?: (bytes: ArrayBuffer) => Promise<string>): Promise<void> {
+    if (format === "xmind") { await this.exportXMind(write); return; }
     const data = JSON.parse(JSON.stringify(this.data)) as StoryMapData;
     let output: ArrayBuffer;
     if (format === "json") output = new TextEncoder().encode(JSON.stringify(data, null, 2) + "\n").buffer;
@@ -546,11 +571,11 @@ export default class StoryMapPlugin extends Plugin {
         output = format === "png" ? await canvasBytes(canvas, "image/png") : imagePdf(new Uint8Array(await canvasBytes(canvas, "image/jpeg")), canvas.width, canvas.height);
       } finally { canvas.width = 0; canvas.height = 0; }
     } else throw new Error(t("不支持的导出格式"));
-    const path = await this.saveExport(data.title, format, output);
+    const path = write ? await write(output) : await this.saveExport(data.title, format, output);
     new Notice(t("已导出：{0}", path), 6000);
   }
   private exportQueue: Promise<unknown> = Promise.resolve();
-  private saveExport(title: string, format: ExportFormat, output: ArrayBuffer): Promise<string> {
+  saveExport(title: string, format: ExportFormat, output: ArrayBuffer): Promise<string> {
     const folder = t("故事地图导出");
     const write = this.exportQueue.catch(() => undefined).then(async () => {
       if (!(await this.app.vault.adapter.exists(folder))) await this.app.vault.createFolder(folder);
@@ -563,7 +588,7 @@ export default class StoryMapPlugin extends Plugin {
     this.exportQueue = write;
     return write;
   }
-  async exportXMind(): Promise<void> {
+  async exportXMind(write?: (bytes: ArrayBuffer) => Promise<string>): Promise<void> {
     const topic = (title: string, children: unknown[] = [], notes = "", labels: string[] = []): Record<string, unknown> => {
       const value: Record<string, unknown> = { id: uid("topic"), class: "topic", title };
       if (children.length) value.children = { attached: children };
@@ -601,7 +626,7 @@ export default class StoryMapPlugin extends Plugin {
     }, { level: 6 });
     const output = new ArrayBuffer(archive.byteLength);
     new Uint8Array(output).set(archive);
-    const path = await this.saveExport(this.data.title, "xmind", output);
+    const path = write ? await write(output) : await this.saveExport(this.data.title, "xmind", output);
     new Notice(t("已导出 XMind：{0}", path), 6000);
   }
   async openStoryNote(story: Story): Promise<void> {

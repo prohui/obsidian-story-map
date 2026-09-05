@@ -17,6 +17,7 @@ export function setLocale(language: Language, hostLanguage = "en"): void {
 }
 
 export const english: Record<string, string> = {
+  "文件名": "File name", "保存位置": "Save location", "系统另存为（桌面、下载或其他目录）": "System Save As (Desktop, Downloads or another folder)", "Obsidian 库内导出文件夹": "Export folder inside the Obsidian vault", "系统窗口可修改文件名和位置，并记住上次选择的目录；覆盖已有文件前会询问。": "The system dialog lets you change the name and location, remembers the last folder, and asks before replacing an existing file.",
   "导出": "Export", "导出地图": "Export map", "导出格式": "Export format", "正在导出…": "Exporting…", "已导出：{0}": "Exported: {0}", "导出失败：{0}": "Export failed: {0}",
   "PNG：完整地图图片，适合分享和插入文档。": "PNG: Full-map image for sharing and inserting into documents.",
   "PDF：单页地图图片，适合分享和打印，文字不可搜索。": "PDF: Single-page map image for sharing and printing. Text is not searchable.",

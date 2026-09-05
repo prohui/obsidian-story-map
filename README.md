@@ -4,7 +4,7 @@ English · [简体中文](README.zh-CN.md)
 
 Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
 
-**[Download 1.2.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.2.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.3.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.3.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
 ![Story Map running in Obsidian with activities, tasks, milestone lanes, role labels, and the story details panel](docs/images/obsidian-en.png)
 
@@ -42,7 +42,7 @@ The toolbar language selector supports Follow Obsidian and all eight languages. 
 
 Click the export arrow to choose a format, then confirm. PNG is a full-map image; PDF embeds that image on one page (text is not searchable); XMind is an editable mind map; JSON is a complete data backup (no import interface yet). PNG/PDF use a clean light layout showing all activities, tasks, milestones and story cards, without controls or the inspector. Search, filters and zoom never limit the exported data. Very large maps exceeding the visual export safety limit must use XMind or JSON.
 
-Files go to a localized folder in your vault, such as `Story Map Exports/` in English. Export labels follow the interface language; story content stays unchanged. Existing files are preserved by numbering new files. Export failures appear in the dialog and can be retried.
+Choose a format card, then use the system Save As dialog to choose the filename and location, including folders outside your vault. Only the selected file is written; cancelling does not export. The system handles overwrite confirmation and remembers the directory. The last successfully exported format is remembered. If the system picker is unavailable, files go to a localized vault folder such as `Story Map Exports/`, with numbered filenames to preserve existing files. Export labels follow the interface language; story content stays unchanged. Errors appear in the dialog and can be retried.
 
 ## Data and compatibility
 
