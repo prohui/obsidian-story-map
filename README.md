@@ -1,44 +1,50 @@
-# Obsidian 故事地图
+# Obsidian Story Map · 故事地图
 
-一个本地优先的用户故事地图编辑器。它把活动、任务、用户故事和发布泳道放进可拖拽的画布，同时让故事卡可以关联普通 Markdown 笔记。
+[English](README.en.md) · 简体中文
 
-Local-first user story mapping for Obsidian: Activity → Task → Story, milestone lanes, one role per story, and XMind export.
+在 Obsidian 中规划用户旅程、拆分用户故事和安排发布里程碑。地图保存在你的 Vault 中，故事卡可以关联 Markdown 笔记，也可以导出为 XMind 脑图。
 
-当前版本为 **0.8.6 预览版**。已验证构建、保存队列、保存失败重试、旧数据保护、撤销重做和 XMind 文件结构；Obsidian 内完整交互、移动端和 XMind 客户端兼容性尚未完成实机验收。
+**[下载 1.0.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.0)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
 
-## 当前能力
+## 功能
 
-- 标准 Activity → Task → Story 三级结构
-- 地图级角色管理，每个 Story 可分配一个角色
-- 顶部可按角色筛选 Story，包括未分配角色
-- 里程碑可新增、编辑和删除；包含 Story 时禁止删除
-- 一键导出原生 `.xmind` 脑图文件，以“用户旅程 / 发布计划 / 角色”三个分支呈现完整信息
-- Activity 跨列分组，Task 作为列，同一 Task 的 Story 纵向堆叠
-- Activity 行末直接添加 Activity；每个 Activity 内直接添加 Task
-- 新建时立即命名，双击 Activity 或 Task 标题可改名
-- 移除重复的固定地图大纲，搜索移入顶部工具栏
-- Activity 只从整行末尾增加；每个 Activity 的最后一个 Task 右侧固定显示 `+ Task`，用于继续追加
-- 每个 Task × Milestone 单元格底部都可直接增加 Story
-- 拖动 Story 到另一张卡片前，可调整任务内优先顺序
-- MVP、版本 1、以后发布泳道
-- 拖拽故事卡改变任务和发布版本
-- 新增、编辑、删除故事；新增活动和任务，空 Activity/Task 可删除
-- 状态、优先级、估点、标签、描述和关联笔记
-- 创建或打开故事 Markdown 笔记
-- 搜索、实际缩放画布、撤销和重做
-- 自动保存为 Vault 根目录下的 `.story-map.json`
-- 适配 Obsidian 明暗主题与窄屏布局
+- Activity → Task → Story 三级结构，Task 横向排列，Story 按里程碑纵向堆叠。
+- 在末尾添加 Activity、Task，在已有故事下方添加 Story；双击名称或故事卡编辑。
+- 添加、编辑和删除角色，每个 Story 可以分配一个角色，也可暂不分配。
+- 里程碑可添加、编辑和删除；包含 Story 时禁止删除。空 Task 和 Activity 可通过右键菜单删除。
+- 拖拽故事到其他任务、里程碑或另一张故事卡前。
+- 右侧浮动详情：状态、优先级、估点、标签、描述和关联笔记。
+- 搜索、角色筛选、画布缩放、撤销和重做；编辑后保留画布滚动位置。
+- 中英文界面，默认跟随 Obsidian，也可手动切换简体中文或 English。
+- XMind 导出：按“用户旅程 / 发布计划 / 角色”组织脑图，故事详情保存在主题备注中。
+- 本地自动保存，显示保存状态，失败可重试；读取失败时暂停写入保护原文件。
 
 ## 安装
 
-1. 从 [GitHub Releases](https://github.com/prohui/obsidian-story-map/releases) 下载 `main.js`、`manifest.json` 和 `styles.css`，或下载 ZIP 后解压。
-2. 在 Vault 中创建 `.obsidian/plugins/story-map/`，将上述三个文件放入该目录。
+1. 从 [Releases](https://github.com/prohui/obsidian-story-map/releases/latest) 下载 ZIP，或分别下载 `main.js`、`manifest.json` 和 `styles.css`。
+2. 在 Vault 中创建 `.obsidian/plugins/story-map/`，放入上述三个文件。
 3. 在 Obsidian → 设置 → 第三方插件中启用“故事地图”。
-4. 点击左侧地图图标，或执行命令“故事地图：打开故事地图”。
+4. 点击左侧地图图标，或执行打开故事地图的命令。
 
-更新时替换这三个文件，再禁用并重新启用插件。当前采用手动安装，尚未收录到 Obsidian 社区插件目录。
+更新时替换上述三个文件，再禁用并重新启用插件。地图数据保存在插件目录之外。当前通过 GitHub 手动安装，尚未收录到 Obsidian 社区插件目录。
 
-## 开发与验证
+## 使用与语言
+
+编辑顶部地图名称，用 Activity 划分用户旅程阶段，为每个 Activity 添加 Task，再按里程碑添加 Story。点击故事卡编辑详情，通过角色管理维护角色，然后将角色分配给故事。拖拽故事调整顺序或发布范围。
+
+顶部语言菜单提供“跟随 Obsidian / 简体中文 / English”，选择立即生效并保存。按钮、弹窗、提示和导出字段随语言切换；故事标题、角色名称和其他用户内容保持原文。示例地图也保留原始内容语言。
+
+点击导出按钮生成 `.xmind` 文件。中文界面导出到 `故事地图导出/`，英文界面导出到 `Story Map Exports/`；已有文件自动编号保留。
+
+## 数据与兼容性
+
+- 每个 Vault 使用一张地图，保存在根目录 `.story-map.json`，请纳入 Vault 备份。
+- 插件自身不联网。关联笔记为普通 Markdown 文件，停用插件后仍可读取。
+- 撤销历史保留在当前会话，最多 50 步。多端使用请先同步再编辑；不提供同时编辑的冲突合并。
+- 保存失败时请保持插件开启，排除磁盘或权限问题后点击底部“保存”。读取失败时请修复文件后重新加载插件。
+- 发布验收环境：macOS、Obsidian 1.8.10、XMind 26.04.01337。已检查桌面和窄面板、中英文界面、核心编辑操作、持久化与 XMind 打开；XMind 保存后重开也已实测。
+
+## 开发
 
 使用 Node.js 22：
 
@@ -47,24 +53,10 @@ npm ci
 npm test
 ```
 
-`npm test` 会执行 TypeScript 检查、生产构建和回归测试。`npm run dev` 启动构建监听。开发者可以将构建后的三个插件文件复制到测试 Vault 中验证。
+`npm test` 执行 TypeScript 检查、生产构建和回归测试。`npm run dev` 启动构建监听。将构建后的三个插件文件复制到测试 Vault 即可运行。
 
-欢迎通过 [Issues](https://github.com/prohui/obsidian-story-map/issues) 报告问题或提交 Pull Request。请附上 Obsidian 版本、操作步骤及不含私人数据的示例。
+翻译集中在 `src/i18n.ts`，通过占位符插入动态值，避免改写用户内容。欢迎提交翻译或功能改进。反馈问题时请附 Obsidian 版本、操作步骤和不含私人数据的示例。
 
-## 数据安全
+## 许可证
 
-插件不会联网。地图数据保存在 Vault 内，可随 Vault 一同备份或通过 Git 管理。故事的 Markdown 文件也是普通文件，停用插件后仍可读取。
-
-每个 Vault 当前只有一张地图。保存状态显示在底部；保存失败时修改仍在内存中，可点击“保存”重试。读取失败时暂停写入，修复文件后重新加载插件。撤销历史只保留在当前会话内，最多 50 步；插件未实现多端同时编辑冲突合并。
-
-## 0.8.6
-
-- 移除根据旧示例名称自动覆盖地图的行为。
-- 重绘后保留画布滚动位置。
-- 空 Activity 保留对齐占位及添加 Task 的入口。
-- 保存串行执行，显示保存状态并提供重试入口。
-- 底部 `+ Milestone` 直接新增里程碑。
-
-## License
-
-[MIT](LICENSE) © 2026 Dahui. 本项目与 Obsidian、Miro、XMind 无隶属关系。
+[MIT](LICENSE) © 2026 Dahui。本项目与 Obsidian、Miro、XMind 无隶属关系。

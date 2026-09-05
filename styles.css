@@ -1,4 +1,4 @@
-.story-map-root { --sm-inspector: 280px; --sm-row-label: 84px; height: 100%; display: grid; grid-template-rows: 52px minmax(0,1fr) 28px; background: var(--background-primary); color: var(--text-normal); font-family: var(--font-interface); overflow: hidden; }
+.story-map-root { --sm-inspector: 280px; --sm-row-label: 84px; height: 100%; display: grid; grid-template-rows: auto minmax(0,1fr) auto; background: var(--background-primary); color: var(--text-normal); font-family: var(--font-interface); overflow: hidden; }
 .story-map-header { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:0 14px; border-bottom:1px solid var(--background-modifier-border); }
 .story-map-title { display:flex; align-items:center; gap:10px; font-weight:650; }
 .story-map-title input { font-size:15px; font-weight:650; border:0; background:transparent; padding:6px; width:240px; }
@@ -75,3 +75,12 @@
 @media (max-width: 900px) { .story-map-root { --sm-inspector:240px; } .story-map-search { width:120px; } .story-map-role-filter { width:104px; } }
 @media (max-width: 680px) { .story-map-inspector { top:8px; right:8px; bottom:8px; width:min(86vw,300px); } .story-map-body.has-inspector .story-map-canvas { padding-right:calc((min(86vw,300px) + 24px) / var(--story-map-zoom)); } .story-map-title input{width:130px}.story-map-toolbar .story-map-zoom-label{display:none}.story-map-search{width:92px}.story-map-role-filter{width:86px} }
 @media (prefers-reduced-motion:reduce){.story-map-card{transition:none}}
+.story-map-header { min-height:52px; flex-wrap:wrap; padding:8px 14px; gap:8px 16px; }
+.story-map-title { min-width:0; flex:1 1 180px; }
+.story-map-title input { min-width:0; max-width:100%; }
+.story-map-toolbar { flex-wrap:wrap; justify-content:flex-end; max-width:100%; }
+.story-map-toolbar > * { flex-shrink:0; }
+.story-map-language { width:116px; height:32px; font-size:11px; }
+.story-map-inspector { max-width:calc(100% - 20px); }
+.story-map-status { min-height:28px; gap:6px; flex-wrap:wrap; padding:3px 12px; }
+.story-map-status button { height:22px; padding:0 8px; font-size:10px; }

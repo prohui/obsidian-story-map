@@ -1,7 +1,7 @@
 {
   "id": "story-map",
   "name": "故事地图",
-  "version": "0.8.6",
+  "version": "1.0.0",
   "minAppVersion": "1.5.0",
   "description": "在 Obsidian 中创建、规划和维护用户故事地图。",
   "author": "Dahui",

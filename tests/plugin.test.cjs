@@ -10,7 +10,8 @@ function createPlugin(adapter = {}) {
     module: { exports: {} }, exports: {}, console, setTimeout, clearTimeout,
     setImmediate, Uint8Array, ArrayBuffer,
     require: id => id === 'obsidian' ? {
-      Plugin: class {}, ItemView: class {}, Modal: class {},
+      Plugin: class { async saveData() {} }, ItemView: class {}, Modal: class {},
+      getLanguage: () => 'en',
       Notice: class { constructor(message) { notices.push(message); } },
       normalizePath: path => path,
     } : require(id),
@@ -92,6 +93,32 @@ test('XMind archive includes journey, milestones and single-role story labels', 
   assert.deepEqual(branches.map(branch => branch.title), ['用户旅程', '发布计划', '角色']);
   assert.equal(branches[1].children.attached.length, plugin.data.releases.length);
   assert.deepEqual(branches[0].children.attached[0].children.attached[0].children.attached[0].labels, ['访客']);
+  const note = branches[0].children.attached[0].children.attached[0].children.attached[0].notes.plain.content;
+  assert.match(note, /状态：已规划/);
+  assert.match(note, /优先级：高/);
+  assert.match(note, /关联笔记：故事\/使用邮箱注册.md/);
   const metadata = JSON.parse(await zip.file('metadata.json').async('string'));
   assert.equal(metadata.creator.version, require('../manifest.json').version);
+});
+
+test('English and automatic language exports translate labels, never story content', async () => {
+  let output;
+  const { plugin } = createPlugin({ exists: async path => path === 'Story Map Exports', writeBinary: async (_, bytes) => { output = bytes; } });
+  const original = JSON.stringify(plugin.data);
+  await plugin.changeLanguage('en');
+  await plugin.exportXMind();
+  let zip = await JSZip.loadAsync(output);
+  let sheets = JSON.parse(await zip.file('content.json').async('string'));
+  const branches = sheets[0].rootTopic.children.attached;
+  assert.deepEqual(branches.map(branch => branch.title), ['User journey', 'Release plan', 'Roles']);
+  const story = branches[0].children.attached[0].children.attached[0].children.attached[0];
+  assert.equal(story.title, '使用邮箱注册');
+  assert.match(story.notes.plain.content, /Status: Planned/);
+  assert.match(story.notes.plain.content, /Priority: High/);
+  await plugin.changeLanguage('auto');
+  await plugin.exportXMind();
+  zip = await JSZip.loadAsync(output);
+  sheets = JSON.parse(await zip.file('content.json').async('string'));
+  assert.equal(sheets[0].rootTopic.children.attached[0].title, 'User journey');
+  assert.equal(JSON.stringify(plugin.data), original);
 });
