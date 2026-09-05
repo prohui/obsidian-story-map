@@ -1,6 +1,6 @@
 {
   "name": "obsidian-story-map",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -15,10 +15,11 @@
     "esbuild": "^0.28.2",
     "eslint": "^9.39.5",
     "eslint-plugin-obsidianmd": "^0.4.2",
+    "jszip": "^3.10.1",
     "obsidian": "latest",
     "typescript": "^5.7.2"
   },
   "dependencies": {
-    "jszip": "^3.10.1"
+    "fflate": "^0.8.3"
   }
 }

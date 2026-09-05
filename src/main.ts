@@ -1,12 +1,12 @@
 import { ItemView, Menu, Modal, Notice, Plugin, TFile, WorkspaceLeaf, normalizePath, setIcon, getLanguage } from "obsidian";
 import { t, setLocale, type Language } from "./i18n";
-import JSZip from "jszip";
+import { strToU8, zipSync } from "fflate";
 import { DEFAULT_MAP } from "./data";
 import type { Activity, Release, Story, StoryMapData, Task } from "./types";
 
 const VIEW_TYPE = "story-map-view";
 const DATA_PATH = ".story-map.json";
-const PLUGIN_VERSION = "1.0.2";
+const PLUGIN_VERSION = "1.0.3";
 const STATUS_LABELS: Record<Story["status"], string> = { idea: "想法", planned: "已规划", doing: "进行中", done: "已完成" };
 const PRIORITY_LABELS: Record<Story["priority"], string> = { low: "低", medium: "中", high: "高" };
 
@@ -533,9 +533,13 @@ export default class StoryMapPlugin extends Plugin {
     const content = [{ id: sheetId, class: "sheet", title: this.data.title, rootTopic: { ...topic(this.data.title, rootChildren), structureClass: "org.xmind.ui.logic.right" }, topicOverlapping: "overlap" }];
     const metadata = { dataStructureVersion: "3", creator: { name: "Obsidian Story Map", version: PLUGIN_VERSION }, layoutEngineVersion: "5", activeSheetId: sheetId };
     const manifest = { "file-entries": { "content.json": {}, "metadata.json": {} } };
-    const zip = new JSZip();
-    zip.file("content.json", JSON.stringify(content)); zip.file("metadata.json", JSON.stringify(metadata)); zip.file("manifest.json", JSON.stringify(manifest));
-    const output = await zip.generateAsync({ type: "arraybuffer", compression: "DEFLATE", compressionOptions: { level: 6 } });
+    const archive = zipSync({
+      "content.json": strToU8(JSON.stringify(content)),
+      "metadata.json": strToU8(JSON.stringify(metadata)),
+      "manifest.json": strToU8(JSON.stringify(manifest)),
+    }, { level: 6 });
+    const output = new ArrayBuffer(archive.byteLength);
+    new Uint8Array(output).set(archive);
     const folder = t("故事地图导出"); if (!(await this.app.vault.adapter.exists(folder))) await this.app.vault.createFolder(folder);
     const safeTitle = this.data.title.replace(/[\\/:*?"<>|]/g, "-").trim() || t("用户故事地图");
     let path = normalizePath(`${folder}/${safeTitle}.xmind`); let sequence = 2;
