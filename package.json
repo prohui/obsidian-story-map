@@ -1,0 +1,21 @@
+{
+  "name": "obsidian-story-map",
+  "version": "0.8.6",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "test": "npm run build && node --test tests/*.test.cjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "builtin-modules": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "obsidian": "latest",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  }
+}

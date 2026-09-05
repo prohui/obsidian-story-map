@@ -1,0 +1,12 @@
+node_modules/
+main.js
+release/
+design/
+*.zip
+.DS_Store
+._*
+.env
+.env.*
+.obsidian/
+.story-map.json
+*.log
