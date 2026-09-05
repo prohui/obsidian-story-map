@@ -6,6 +6,10 @@ Plan user journeys, organize stories, and define release milestones inside Obsid
 
 **[Download 1.0.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
+![Story Map running in Obsidian with activities, tasks, milestone lanes, role labels, and the story details panel](docs/images/obsidian-en.png)
+
+*Captured in Obsidian 1.13.7 using sample data. The English UI preserves the original language of story content.*
+
 ## Features
 
 - Activity → Task → Story hierarchy with task columns and milestone lanes.

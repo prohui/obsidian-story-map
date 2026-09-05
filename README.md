@@ -6,6 +6,10 @@
 
 **[下载 1.0.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.0)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
 
+![Obsidian 中的故事地图：活动、任务、发布里程碑、角色标签与右侧故事详情](docs/images/obsidian-zh.png)
+
+*Obsidian 1.13.7 实际运行截图，使用示例数据。*
+
 ## 功能
 
 - Activity → Task → Story 三级结构，Task 横向排列，Story 按里程碑纵向堆叠。
