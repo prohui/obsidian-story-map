@@ -1,16 +1,16 @@
 import { ItemView, Menu, Modal, Notice, Plugin, TFile, WorkspaceLeaf, normalizePath, setIcon, getLanguage } from "obsidian";
-import { t, setLocale, type Language } from "./i18n";
+import { t, setLocale, isLanguage, languageNames, type Language } from "./i18n";
 import { strToU8, zipSync } from "fflate";
-import { DEFAULT_MAP } from "./data";
+import { createSampleMap } from "./sample";
 import type { Activity, Release, Story, StoryMapData, Task } from "./types";
 
 const VIEW_TYPE = "story-map-view";
 const DATA_PATH = ".story-map.json";
-const PLUGIN_VERSION = "1.0.4";
+const PLUGIN_VERSION = "1.1.0";
 const STATUS_LABELS: Record<Story["status"], string> = { idea: "想法", planned: "已规划", doing: "进行中", done: "已完成" };
 const PRIORITY_LABELS: Record<Story["priority"], string> = { low: "低", medium: "中", high: "高" };
 
-function cloneDefault(): StoryMapData { return JSON.parse(JSON.stringify(DEFAULT_MAP)) as StoryMapData; }
+function cloneDefault(): StoryMapData { return createSampleMap(); }
 function uid(prefix: string): string { return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`; }
 
 class NameModal extends Modal {
@@ -88,7 +88,7 @@ class MilestoneManagerModal extends Modal {
       const row = list.createDiv("story-map-milestone-row");
       const title = row.createEl("input", { value: release.title, attr: { "aria-label": t("里程碑名称") } });
       const subtitle = row.createEl("input", { value: release.subtitle, placeholder: t("说明"), attr: { "aria-label": t("里程碑说明") } });
-      const remove = row.createEl("button", { text: storyCount ? `${storyCount} Story` : t("删除"), attr: { "aria-label": storyCount ? t("该里程碑包含 {0} 个 Story，不能删除", storyCount) : t("删除里程碑 {0}", release.title) } });
+      const remove = row.createEl("button", { text: storyCount ? String(storyCount) : t("删除"), attr: { "aria-label": storyCount ? t("该里程碑包含 {0} 个 Story，不能删除", storyCount) : t("删除里程碑 {0}", release.title) } });
       remove.disabled = storyCount > 0; remove.title = storyCount ? t("请先将 Story 移动到其他里程碑") : t("删除里程碑");
       title.onchange = () => { release.title = title.value.trim() || t("未命名里程碑"); void this.plugin.commit(); };
       subtitle.onchange = () => { release.subtitle = subtitle.value.trim(); void this.plugin.commit(); };
@@ -180,7 +180,7 @@ class StoryMapView extends ItemView {
     title.onchange = () => { data.title = title.value; void this.plugin.commit(false); };
     const toolbar = header.createDiv("story-map-toolbar");
     const language = toolbar.createEl("select", { cls: "story-map-language", attr: { "aria-label": t("语言") } });
-    [["auto", t("跟随 Obsidian")], ["zh", "简体中文"], ["en", "English"]].forEach(([value, text]) => language.createEl("option", { value, text }));
+    [["auto", t("跟随 Obsidian")], ...Object.entries(languageNames)].forEach(([value, text]) => language.createEl("option", { value, text }));
     language.value = this.plugin.language;
     language.onchange = () => void this.plugin.changeLanguage(language.value as Language);
     const search = toolbar.createEl("input", { type: "search", placeholder: t("搜索 Story"), value: this.query, cls: "story-map-search", attr: { "aria-label": t("搜索故事") } });
@@ -243,12 +243,13 @@ class StoryMapView extends ItemView {
     activities.forEach(activity => {
       const activityTasks = tasks.filter(t => t.activityId === activity.id);
       const box = activityRow.createDiv("story-map-activity"); box.id = `activity-${activity.id}`;
+      box.setAttribute("data-label", t("活动 Activity"));
       box.style.gridColumn = `span ${Math.max(1, activityTasks.length)}`;
       const name = box.createSpan({ text: activity.title, cls: "story-map-activity-name", attr: { title: t("双击改名") } });
       name.ondblclick = event => { event.stopPropagation(); this.renameActivity(activity); };
       box.oncontextmenu = e => this.activityMenu(e, activity);
     });
-    const addActivity = activityRow.createEl("button", { text: "+ activity", cls: "story-map-add-activity" }); addActivity.onclick = () => this.addActivity();
+    const addActivity = activityRow.createEl("button", { text: `+ ${t("活动 Activity")}`, cls: "story-map-add-activity" }); addActivity.onclick = () => this.addActivity();
     const taskRow = canvas.createDiv("story-map-task-row");
     taskRow.createDiv({ text: t("任务 Task"), cls: "story-map-axis-label" });
     slots.forEach((task, index) => {
@@ -256,7 +257,7 @@ class StoryMapView extends ItemView {
       if (!task) {
         const activity = slotActivities[index];
         box.addClass("is-activity-start", "is-activity-end");
-        box.createEl("button", { text: "+ task" }).onclick = () => { if (activity) this.addTask(activity); };
+        box.createEl("button", { text: `+ ${t("任务 Task")}` }).onclick = () => { if (activity) this.addTask(activity); };
         return;
       }
       const taskName = box.createSpan({ text: task.title, cls: "story-map-task-name", attr: { title: t("双击改名") } }); taskName.ondblclick = event => { event.stopPropagation(); this.renameTask(task); };
@@ -265,14 +266,14 @@ class StoryMapView extends ItemView {
       const isLastTask = siblings[siblings.length - 1]?.id === task.id;
       if (isLastTask) {
         box.addClass("is-activity-end");
-        const add = box.createEl("button", { text: "+ task", cls: "story-map-add-task-after", attr: { "aria-label": t("在{0}右侧添加 Task", task.title), title: t("追加 Task") } });
+        const add = box.createEl("button", { text: `+ ${t("任务 Task")}`, cls: "story-map-add-task-after", attr: { "aria-label": t("在{0}右侧添加 Task", task.title), title: t("追加 Task") } });
         add.onclick = event => { event.stopPropagation(); const activity = activities.find(item => item.id === task.activityId); if (activity) this.addTask(activity, task); };
       }
       box.oncontextmenu = e => this.taskMenu(e, task);
     });
     releases.forEach(release => this.renderRelease(canvas, release, slots, stories));
     const addMilestone = canvas.createDiv("story-map-add-milestone-row");
-    const addMilestoneButton = addMilestone.createEl("button", { text: "+ milestone", attr: { "aria-label": t("添加或管理里程碑") } });
+    const addMilestoneButton = addMilestone.createEl("button", { text: t("+ 里程碑"), attr: { "aria-label": t("添加或管理里程碑") } });
     addMilestoneButton.onclick = () => new NameModal(this.plugin, t("添加里程碑"), t("里程碑名称"), t("新里程碑"), title => {
       this.plugin.data.releases.push({ id: uid("milestone"), title, subtitle: "" });
     }).open();
@@ -298,7 +299,7 @@ class StoryMapView extends ItemView {
         if (storyId) this.moveStory(storyId, task, release);
       };
       stories.filter(story => story.taskId === task.id && story.releaseId === release.id).forEach(story => this.renderStory(col, story, task, release));
-      const addStory = col.createEl("button", { text: "+ story", cls: "story-map-add-story", attr: { "aria-label": t("在{0}的{1}下添加 Story", release.title, task.title) } });
+      const addStory = col.createEl("button", { text: `+ ${t("故事")}`, cls: "story-map-add-story", attr: { "aria-label": t("在{0}的{1}下添加 Story", release.title, task.title) } });
       addStory.onclick = event => { event.stopPropagation(); this.addStory(task, release); };
     });
   }
@@ -449,7 +450,7 @@ export default class StoryMapPlugin extends Plugin {
   async onload(): Promise<void> {
     const settings: unknown = await this.loadData();
     const language = settings && typeof settings === "object" && "language" in settings ? settings.language : undefined;
-    this.language = language === "zh" || language === "en" ? language : "auto";
+    this.language = isLanguage(language) ? language : "auto";
     setLocale(this.language, this.hostLanguage());
     await this.loadMap();
     this.registerView(VIEW_TYPE, leaf => new StoryMapView(leaf, this));
@@ -461,6 +462,7 @@ export default class StoryMapPlugin extends Plugin {
   private async loadMap(): Promise<void> {
     try {
       if (await this.app.vault.adapter.exists(DATA_PATH)) this.data = JSON.parse(await this.app.vault.adapter.read(DATA_PATH)) as StoryMapData;
+      else this.data = cloneDefault();
       this.data.roles ||= [];
       this.data.stories.forEach(story => {
         const legacy = story as Story & { roleIds?: string[] };
@@ -552,7 +554,7 @@ export default class StoryMapPlugin extends Plugin {
     let file = this.app.vault.getAbstractFileByPath(path);
     if (!(file instanceof TFile)) {
       const folder = path.split("/").slice(0, -1).join("/"); if (folder && !(await this.app.vault.adapter.exists(folder))) await this.app.vault.createFolder(folder);
-      file = await this.app.vault.create(path, t("---\nstatus: {0}\npriority: {1}\nestimate: {2}\ntags: [{3}]\n---\n\n# {4}\n\n{5}\n\n## 验收标准\n\n- [ ] \n", story.status, story.priority, story.estimate, story.tags.join(", "), story.title, story.description));
+      file = await this.app.vault.create(path, `---\nstatus: ${story.status}\npriority: ${story.priority}\nestimate: ${story.estimate}\ntags: [${story.tags.join(", ")}]\n---\n\n# ${story.title}\n\n${story.description}\n\n## ${t("验收标准")}\n\n- [ ] \n`);
       await this.commit(false);
     }
     if (file instanceof TFile) await this.app.workspace.getLeaf("tab").openFile(file);

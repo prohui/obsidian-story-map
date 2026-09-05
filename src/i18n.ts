@@ -1,12 +1,23 @@
-export type Language = "auto" | "zh" | "en";
-let locale: "zh" | "en" = "zh";
+import { dictionaries, type ExtraLocale } from "./locales";
+export type Locale = "zh" | "en" | ExtraLocale;
+export type Language = "auto" | Locale;
+export const languageNames: Record<Locale, string> = { en: "English", zh: "简体中文", "zh-TW": "繁體中文", ja: "日本語", ko: "한국어", de: "Deutsch", fr: "Français", es: "Español" };
+let locale: Locale = "en";
+export function isLanguage(value: unknown): value is Language { return typeof value === "string" && (value === "auto" || Object.keys(languageNames).includes(value)); }
+export function getLocale(): Locale { return locale; }
 
 export function setLocale(language: Language, hostLanguage = "en"): void {
-  locale = language === "auto" ? (hostLanguage.toLowerCase().startsWith("zh") ? "zh" : "en") : language;
+  const value = (language === "auto" ? hostLanguage : language).toLowerCase().replace(/_/g, "-");
+  if (value === "zh-tw" || value.startsWith("zh-hant") || value === "zh-hk" || value === "zh-mo") locale = "zh-TW";
+  else if (value === "zh" || value.startsWith("zh-")) locale = "zh";
+  else {
+    const base = value.split("-")[0];
+    locale = isLanguage(base) && base !== "auto" ? base : "en";
+  }
 }
 
 export const english: Record<string, string> = {
-  "想法": "Idea", "已规划": "Planned", "进行中": "In progress", "已完成": "Done",
+  "故事": "Story", "想法": "Idea", "已规划": "Planned", "进行中": "In progress", "已完成": "Done",
   "低": "Low", "中": "Medium", "高": "High", "取消": "Cancel", "保存": "Save",
   "添加 Activity": "Add Activity", "Activity 名称": "Activity name", "例如：进入系统": "e.g. Access the system",
   "第一个 Task": "First Task", "例如：注册账号": "e.g. Create an account", "创建": "Create",
@@ -51,11 +62,10 @@ export const english: Record<string, string> = {
   "优先级：{0}": "Priority: {0}", "估点：{0}": "Estimate: {0}", "标签：{0}": "Tags: {0}", "角色：{0}": "Role: {0}",
   "关联笔记：{0}": "Linked note: {0}", "用户旅程": "User journey", "发布计划": "Release plan", "故事地图导出": "Story Map Exports",
   "用户故事地图": "User Story Map", "已导出 XMind：{0}": "XMind exported: {0}", "故事/{0}.md": "Stories/{0}.md",
-  "---\nstatus: {0}\npriority: {1}\nestimate: {2}\ntags: [{3}]\n---\n\n# {4}\n\n{5}\n\n## 验收标准\n\n- [ ] \n": "---\nstatus: {0}\npriority: {1}\nestimate: {2}\ntags: [{3}]\n---\n\n# {4}\n\n{5}\n\n## Acceptance criteria\n\n- [ ] \n",
-  "语言": "Language", "跟随 Obsidian": "Follow Obsidian", "语言设置保存失败": "Could not save language preference",
+  "语言": "Language", "跟随 Obsidian": "Follow Obsidian", "语言设置保存失败": "Could not save language preference", "验收标准": "Acceptance criteria",
 };
 
 export function t(key: string, ...values: Array<string | number>): string {
-  const template = locale === "en" ? english[key] ?? key : key;
+  const template = locale === "zh" ? key : locale === "en" ? english[key] ?? key : dictionaries[locale][key] ?? english[key] ?? key;
   return template.replace(/\{(\d+)\}/g, (token, index) => values[Number(index)] === undefined ? token : String(values[Number(index)]));
 }

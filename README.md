@@ -1,80 +1,68 @@
-# Obsidian Story Map · 故事地图
+# Obsidian Story Map
 
-[English](README.en.md) · 简体中文
+English · [简体中文](README.zh-CN.md)
 
-## English overview
+Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
 
-Story Map is a visual user story mapping plugin for Obsidian. Plan activities, tasks, stories, roles and release milestones, link Markdown notes, and export to XMind. Data stays locally in your vault. The interface supports English and Simplified Chinese. See the [full English documentation](README.en.md).
+**[Download 1.1.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.1.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
-### Installation
+![Story Map running in Obsidian with activities, tasks, milestone lanes, role labels, and the story details panel](docs/images/obsidian-en.png)
 
-Requires Obsidian 1.8.10 or later. Visit the [community listing](https://community.obsidian.md/plugins/story-map) for current directory availability. For manual installation, download `main.js`, `manifest.json` and `styles.css` from the [latest release](https://github.com/prohui/obsidian-story-map/releases/latest), place them in your vault's `.obsidian/plugins/story-map/` folder, then enable **Story Map** in Settings → Community plugins.
+*Captured in Obsidian 1.13.7 using sample data. New sample content follows the selected language; existing maps stay unchanged.*
 
-### Usage
+## Features
 
-Click the map ribbon icon to open the editor. Add activities, add tasks within each activity, and add stories under tasks in milestone lanes. Click a story to edit its details, assign a role, or link a Markdown note. Drag stories to reorder them or change milestones. Use the export button to save an XMind file in your vault.
+- Activity → Task → Story hierarchy with task columns and milestone lanes.
+- Add activities/tasks at the end of their groups; add stories below existing cards. Double-click to edit.
+- Create, edit, or delete roles. Each story can have one role or remain unassigned.
+- Manage milestones. Milestones containing stories cannot be deleted; empty tasks and activities can be deleted from the context menu.
+- Drag stories between tasks and milestones or before another card to reorder them.
+- Floating details: status, priority, estimate, tags, description, and linked Markdown notes.
+- Search, role filters, zoom, undo/redo, and preserved scroll position.
+- Eight interface languages: English, Simplified Chinese, Traditional Chinese, Japanese, Korean, German, French, and Spanish. Follow Obsidian automatically or choose manually.
+- XMind export with User journey, Release plan, and Roles branches. Story details appear in topic notes.
+- Local saving with status, retry, and protection against overwriting unreadable data.
 
-在 Obsidian 中规划用户旅程、拆分用户故事和安排发布里程碑。地图保存在你的 Vault 中，故事卡可以关联 Markdown 笔记，也可以导出为 XMind 脑图。
+## Install
 
-**[下载 1.0.4](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.4)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
+Requires Obsidian 1.8.10 or newer.
 
-![Obsidian 中的故事地图：活动、任务、发布里程碑、角色标签与右侧故事详情](docs/images/obsidian-zh.png)
+1. Download `main.js`, `manifest.json`, and `styles.css` individually from [Releases](https://github.com/prohui/obsidian-story-map/releases/latest).
+2. Create `.obsidian/plugins/story-map/` in your vault and place the three files there.
+3. Enable Story Map in Obsidian's community plugin settings.
+4. Click the map ribbon icon or run the Open Story Map command.
 
-*Obsidian 1.13.7 实际运行截图，使用示例数据。*
+To update, replace the files and disable/re-enable the plugin. Map data is stored outside the plugin folder. Visit the [Obsidian community listing](https://community.obsidian.md/plugins/story-map) for the current review status and installation entry point.
 
-## 功能
+## Use and language
 
-- Activity → Task → Story 三级结构，Task 横向排列，Story 按里程碑纵向堆叠。
-- 在末尾添加 Activity、Task，在已有故事下方添加 Story；双击名称或故事卡编辑。
-- 添加、编辑和删除角色，每个 Story 可以分配一个角色，也可暂不分配。
-- 里程碑可添加、编辑和删除；包含 Story 时禁止删除。空 Task 和 Activity 可通过右键菜单删除。
-- 拖拽故事到其他任务、里程碑或另一张故事卡前。
-- 右侧浮动详情：状态、优先级、估点、标签、描述和关联笔记。
-- 搜索、角色筛选、画布缩放、撤销和重做；编辑后保留画布滚动位置。
-- 中英文界面，默认跟随 Obsidian，也可手动切换简体中文或 English。
-- XMind 导出：按“用户旅程 / 发布计划 / 角色”组织脑图，故事详情保存在主题备注中。
-- 本地自动保存，显示保存状态，失败可重试；读取失败时暂停写入保护原文件。
+Name the map, add activities, break them into tasks, and add stories within milestone lanes. Click a story to edit details or link a note. Manage roles and assign one to each story as needed. Drag cards to change their ordering or release scope.
 
-## 安装
+The toolbar language selector supports Follow Obsidian and all eight languages. Changes take effect immediately and persist across reloads. Unsupported host languages fall back to English; Traditional Chinese locales are detected separately. New and explicitly reset sample maps use the current language. Changing the interface language never translates or overwrites an existing map.
 
-需要 Obsidian 1.8.10 或更新版本。
+Exported `.xmind` files go to a localized export folder in your vault, such as `Story Map Exports/` in English. Branch names and metadata labels follow the interface language; story content stays unchanged. Existing exports are preserved by numbering new files.
 
-1. 从 [Releases](https://github.com/prohui/obsidian-story-map/releases/latest) 分别下载 `main.js`、`manifest.json` 和 `styles.css`。
-2. 在 Vault 中创建 `.obsidian/plugins/story-map/`，放入上述三个文件。
-3. 在 Obsidian → 设置 → 第三方插件中启用“Story Map”。
-4. 点击左侧地图图标，或执行打开故事地图的命令。
+## Data and compatibility
 
-更新时替换上述三个文件，再禁用并重新启用插件。地图数据保存在插件目录之外。也可访问 [Obsidian 社区页面](https://community.obsidian.md/plugins/story-map)，查看当前审核状态与安装入口。
+- One map per vault, stored in `.story-map.json` at the vault root. Include it in backups.
+- The plugin makes no network requests. Linked Markdown notes remain readable without it.
+- Undo history lasts for the current session, up to 50 steps. Sync before editing on another device; simultaneous editing conflict resolution is not provided.
+- If saving fails, keep the plugin open, resolve disk/permission problems, and click Save. If loading fails, repair the map file and reload the plugin.
+- Release acceptance: macOS, Obsidian 1.8.10, XMind 26.04.01337. Desktop/narrow layouts, both languages, core editing flows, persistence, and opening exports were checked. Saving and reopening in XMind were also tested.
 
-## 使用与语言
+## Development
 
-编辑顶部地图名称，用 Activity 划分用户旅程阶段，为每个 Activity 添加 Task，再按里程碑添加 Story。点击故事卡编辑详情，通过角色管理维护角色，然后将角色分配给故事。拖拽故事调整顺序或发布范围。
-
-顶部语言菜单提供“跟随 Obsidian / 简体中文 / English”，选择立即生效并保存。按钮、弹窗、提示和导出字段随语言切换；故事标题、角色名称和其他用户内容保持原文。示例地图也保留原始内容语言。
-
-点击导出按钮生成 `.xmind` 文件。中文界面导出到 `故事地图导出/`，英文界面导出到 `Story Map Exports/`；已有文件自动编号保留。
-
-## 数据与兼容性
-
-- 每个 Vault 使用一张地图，保存在根目录 `.story-map.json`，请纳入 Vault 备份。
-- 插件自身不联网。关联笔记为普通 Markdown 文件，停用插件后仍可读取。
-- 撤销历史保留在当前会话，最多 50 步。多端使用请先同步再编辑；不提供同时编辑的冲突合并。
-- 保存失败时请保持插件开启，排除磁盘或权限问题后点击底部“保存”。读取失败时请修复文件后重新加载插件。
-- 发布验收环境：macOS、Obsidian 1.8.10、XMind 26.04.01337。已检查桌面和窄面板、中英文界面、核心编辑操作、持久化与 XMind 打开；XMind 保存后重开也已实测。
-
-## 开发
-
-使用 Node.js 22：
+With Node.js 22:
 
 ```sh
 npm ci
 npm test
 ```
 
-`npm test` 执行 Obsidian 官方规范检查、TypeScript 检查、生产构建和回归测试。`npm run lint` 可单独运行规范检查，`npm run dev` 启动构建监听。将构建后的三个插件文件复制到测试 Vault 即可运行。
+Tests include official Obsidian lint rules, TypeScript checks, production bundling, persistence regression tests, localization, and XMind structure checks. `npm run lint` runs the guidelines check separately. `npm run dev` watches for changes. Copy the built plugin files into a test vault to run it.
 
-翻译集中在 `src/i18n.ts`，通过占位符插入动态值，避免改写用户内容。欢迎提交翻译或功能改进。反馈问题时请附 Obsidian 版本、操作步骤和不含私人数据的示例。
+Translations are centralized in `src/i18n.ts`. User values are interpolated without modification. Contributions and additional translations are welcome. Include your Obsidian version, reproduction steps, and a non-private example when reporting an issue.
 
-## 许可证
+## License
 
-[MIT](LICENSE) © 2026 Dahui。本项目与 Obsidian、Miro、XMind 无隶属关系。
+[MIT](LICENSE) © 2026 Dahui. Not affiliated with Obsidian, Miro, or XMind.

@@ -23,6 +23,41 @@ function createPlugin(adapter = {}) {
   return { plugin, notices };
 }
 
+test('all eight languages initialize translated samples, export, and preserve existing data', async () => {
+  const cases = { en: 'Account access journey', zh: '进入系统的用户旅程', 'zh-TW': '進入系統的使用者旅程', ja: 'システムアクセスのユーザージャーニー', ko: '시스템 접속 사용자 여정', de: 'Nutzerreise zum Systemzugang', fr: 'Parcours d’accès au compte', es: 'Recorrido de acceso a la cuenta' };
+  for (const [locale, title] of Object.entries(cases)) {
+    let output;
+    const {plugin}=createPlugin({exists:async()=>false,writeBinary:async(_,bytes)=>{output=bytes;}});
+    plugin.app.vault.createFolder=async()=>{};
+    await plugin.changeLanguage(locale);
+    await plugin.loadMap();
+    assert.equal(plugin.data.title,title);
+    assert.equal(plugin.data.stories.length,13);
+    const snapshot=JSON.stringify(plugin.data);
+    await plugin.exportXMind();
+    const zip=await JSZip.loadAsync(output);
+    const content=JSON.parse(await zip.file('content.json').async('string'));
+    assert.equal(content[0].title,title);
+    assert.equal(content[0].rootTopic.children.attached.length,3);
+    await plugin.changeLanguage(locale==='en'?'zh':'en');
+    assert.equal(JSON.stringify(plugin.data),snapshot);
+    plugin.app.vault.adapter={exists:async()=>true,read:async()=>snapshot};
+    await plugin.loadMap();
+    assert.equal(JSON.stringify(plugin.data),snapshot);
+  }
+});
+
+test('saved language preferences are restored before initializing a fresh map', async () => {
+  for (const language of ['zh-TW','ja','ko','de','fr','es','en','zh','auto','invalid']) {
+    const {plugin}=createPlugin({exists:async()=>false});
+    plugin.loadData=async()=>({language});
+    plugin.registerView=()=>{};plugin.addRibbonIcon=()=>{};plugin.addCommand=()=>{};
+    await plugin.onload();
+    assert.equal(plugin.language,language==='invalid'?'auto':language);
+    assert.ok(plugin.data.title);
+  }
+});
+
 test('overlapping edits are written sequentially with the latest edit last', async () => {
   const writes = [];
   const { plugin } = createPlugin({ write: async (_, text) => {
@@ -86,17 +121,18 @@ test('XMind archive includes journey, milestones and single-role story labels', 
   let output;
   const { plugin } = createPlugin({ exists: async path => path === '故事地图导出', writeBinary: async (_, bytes) => { output = bytes; } });
   plugin.data.stories[0].roleId = 'visitor';
+  await plugin.changeLanguage('zh');
   await plugin.exportXMind();
   const zip = await JSZip.loadAsync(output);
   const sheets = JSON.parse(await zip.file('content.json').async('string'));
   const branches = sheets[0].rootTopic.children.attached;
   assert.deepEqual(branches.map(branch => branch.title), ['用户旅程', '发布计划', '角色']);
   assert.equal(branches[1].children.attached.length, plugin.data.releases.length);
-  assert.deepEqual(branches[0].children.attached[0].children.attached[0].children.attached[0].labels, ['访客']);
+  assert.deepEqual(branches[0].children.attached[0].children.attached[0].children.attached[0].labels, ['Visitor']);
   const note = branches[0].children.attached[0].children.attached[0].children.attached[0].notes.plain.content;
   assert.match(note, /状态：已规划/);
   assert.match(note, /优先级：高/);
-  assert.match(note, /关联笔记：故事\/使用邮箱注册.md/);
+  assert.match(note, /关联笔记：Stories\/Sign up with email.md/);
   const metadata = JSON.parse(await zip.file('metadata.json').async('string'));
   assert.equal(metadata.creator.version, require('../manifest.json').version);
 });
@@ -112,7 +148,7 @@ test('English and automatic language exports translate labels, never story conte
   const branches = sheets[0].rootTopic.children.attached;
   assert.deepEqual(branches.map(branch => branch.title), ['User journey', 'Release plan', 'Roles']);
   const story = branches[0].children.attached[0].children.attached[0].children.attached[0];
-  assert.equal(story.title, '使用邮箱注册');
+  assert.equal(story.title, 'Sign up with email');
   assert.match(story.notes.plain.content, /Status: Planned/);
   assert.match(story.notes.plain.content, /Priority: High/);
   await plugin.changeLanguage('auto');

@@ -1,14 +1,14 @@
 # Obsidian Story Map
 
-English · [简体中文](README.md)
+English · [简体中文](README.zh-CN.md)
 
 Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
 
-**[Download 1.0.4](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.4)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.1.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.1.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
 ![Story Map running in Obsidian with activities, tasks, milestone lanes, role labels, and the story details panel](docs/images/obsidian-en.png)
 
-*Captured in Obsidian 1.13.7 using sample data. The English UI preserves the original language of story content.*
+*Captured in Obsidian 1.13.7 using sample data. New sample content follows the selected language; existing maps stay unchanged.*
 
 ## Features
 
@@ -19,7 +19,7 @@ Plan user journeys, organize stories, and define release milestones inside Obsid
 - Drag stories between tasks and milestones or before another card to reorder them.
 - Floating details: status, priority, estimate, tags, description, and linked Markdown notes.
 - Search, role filters, zoom, undo/redo, and preserved scroll position.
-- English and Simplified Chinese interface, with automatic Obsidian language detection or manual selection.
+- Eight interface languages: English, Simplified Chinese, Traditional Chinese, Japanese, Korean, German, French, and Spanish. Follow Obsidian automatically or choose manually.
 - XMind export with User journey, Release plan, and Roles branches. Story details appear in topic notes.
 - Local saving with status, retry, and protection against overwriting unreadable data.
 
@@ -38,9 +38,9 @@ To update, replace the files and disable/re-enable the plugin. Map data is store
 
 Name the map, add activities, break them into tasks, and add stories within milestone lanes. Click a story to edit details or link a note. Manage roles and assign one to each story as needed. Drag cards to change their ordering or release scope.
 
-The toolbar language selector supports Follow Obsidian, 简体中文, and English. Changes take effect immediately and persist across reloads. Unsupported host languages fall back to English. User content, including sample content, retains its original language.
+The toolbar language selector supports Follow Obsidian and all eight languages. Changes take effect immediately and persist across reloads. Unsupported host languages fall back to English; Traditional Chinese locales are detected separately. New and explicitly reset sample maps use the current language. Changing the interface language never translates or overwrites an existing map.
 
-Exported `.xmind` files go to `Story Map Exports/` in English or `故事地图导出/` in Chinese. Existing exports are preserved by numbering new files.
+Exported `.xmind` files go to a localized export folder in your vault, such as `Story Map Exports/` in English. Branch names and metadata labels follow the interface language; story content stays unchanged. Existing exports are preserved by numbering new files.
 
 ## Data and compatibility
 
