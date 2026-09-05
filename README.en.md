@@ -4,7 +4,7 @@ English · [简体中文](README.md)
 
 Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
 
-**[Download 1.0.3](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.3)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.0.4](https://github.com/prohui/obsidian-story-map/releases/tag/1.0.4)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
 ![Story Map running in Obsidian with activities, tasks, milestone lanes, role labels, and the story details panel](docs/images/obsidian-en.png)
 
@@ -27,12 +27,12 @@ Plan user journeys, organize stories, and define release milestones inside Obsid
 
 Requires Obsidian 1.8.10 or newer.
 
-1. Download the ZIP from [Releases](https://github.com/prohui/obsidian-story-map/releases/latest), or download `main.js`, `manifest.json`, and `styles.css` individually.
+1. Download `main.js`, `manifest.json`, and `styles.css` individually from [Releases](https://github.com/prohui/obsidian-story-map/releases/latest).
 2. Create `.obsidian/plugins/story-map/` in your vault and place the three files there.
 3. Enable Story Map in Obsidian's community plugin settings.
 4. Click the map ribbon icon or run the Open Story Map command.
 
-To update, replace the files and disable/re-enable the plugin. Map data is stored outside the plugin folder. Installation is currently through GitHub; the plugin is not listed in Obsidian's community plugin directory.
+To update, replace the files and disable/re-enable the plugin. Map data is stored outside the plugin folder. Visit the [Obsidian community listing](https://community.obsidian.md/plugins/story-map) for the current review status and installation entry point.
 
 ## Use and language
 

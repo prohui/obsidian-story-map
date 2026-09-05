@@ -69,7 +69,7 @@
 .story-map-role-choices { display:flex; flex-wrap:wrap; gap:6px; min-height:30px; align-items:center; }
 .story-map-role-choices select { flex:1 1 110px; min-width:0; }
 .story-map-role-choices label { display:inline-flex; align-items:center; gap:5px; padding:5px 8px; border:1px solid var(--background-modifier-border); border-radius:12px; cursor:pointer; }
-.story-map-role-choices input { width:auto !important; margin:0; }
+.story-map-inspector .story-map-role-choices input, .modal .story-map-role-choices input { width:auto; margin:0; }
 .story-map-role-choices .story-map-manage-roles { height:28px; padding:0 9px; border:1px dashed var(--interactive-accent); box-shadow:none; background:transparent; color:var(--interactive-accent); font-size:10px; }
 .story-map-empty-inline { color:var(--text-muted); font-size:11px; }
 @media (max-width: 900px) { .story-map-root { --sm-inspector:240px; } .story-map-search { width:120px; } .story-map-role-filter { width:104px; } }
