@@ -8,7 +8,7 @@ import type { Activity, Release, Story, StoryMapData, Task } from "./types";
 
 const VIEW_TYPE = "story-map-view";
 const DATA_PATH = ".story-map.json";
-const PLUGIN_VERSION = "1.4.0";
+const PLUGIN_VERSION = "1.4.1";
 const STATUS_LABELS: Record<Story["status"], string> = { idea: "想法", planned: "已规划", doing: "进行中", done: "已完成" };
 const PRIORITY_LABELS: Record<Story["priority"], string> = { low: "低", medium: "中", high: "高" };
 
@@ -188,7 +188,7 @@ function noteSelector(parent: HTMLElement, plugin: StoryMapPlugin, initial: stri
   const container = parent.createDiv("story-map-note-selector");
   const render = (): void => {
     container.empty();
-    const select = container.createEl("button", { text: path || t("搜索笔记"), attr: { title: path || t("搜索笔记") } });
+    const select = container.createEl("button", { text: path?.split("/").pop()?.replace(/\.md$/i, "") || t("搜索笔记"), attr: { title: path || t("搜索笔记") } });
     select.onclick = () => new NotePicker(plugin, selected => { path = selected; change(path); render(); }).open();
     if (path) {
       container.createEl("button", { text: t("打开笔记") }).onclick = () => { if (path) void plugin.app.workspace.openLinkText(path, ""); };
@@ -198,10 +198,52 @@ function noteSelector(parent: HTMLElement, plugin: StoryMapPlugin, initial: stri
   render();
 }
 
-class MilestoneEditorModal extends Modal {
+class ConflictModal extends Modal {
+  constructor(private plugin: StoryMapPlugin) { super(plugin.app); }
+  onOpen(): void {
+    this.contentEl.addClass("story-map-modal", "story-map-compact-dialog");
+    this.contentEl.createEl("h2", { text: t("文件冲突") });
+    this.contentEl.createEl("p", { text: t("保留双方版本：先将当前地图另存为副本，再加载磁盘版本。") });
+    const error = this.contentEl.createEl("p", { attr: { role: "alert" } });
+    const actions = this.contentEl.createDiv("story-map-modal-actions");
+    actions.createEl("button", { text: t("取消") }).onclick = () => this.close();
+    const save = actions.createEl("button", { text: t("备份并重新加载"), cls: "mod-cta" });
+    save.onclick = () => {
+      save.disabled = true;
+      void this.plugin.resolveConflict().then(() => this.close()).catch((cause: unknown) => { error.setText(String(cause)); save.disabled = false; });
+    };
+  }
+}
+
+class SavingModal extends Modal {
+  private saving = false;
+  private editingPlugin: StoryMapPlugin | undefined;
+  protected trackEditor(plugin: StoryMapPlugin): void { this.editingPlugin = plugin; plugin.activeEditors++; }
+  onClose(): void { if (this.editingPlugin) { this.editingPlugin.activeEditors--; this.editingPlugin = undefined; } }
+  protected async persist(plugin: StoryMapPlugin, action: () => void): Promise<void> {
+    if (this.saving) return;
+    this.saving = true;
+    const controls = Array.from(this.contentEl.querySelectorAll<HTMLInputElement | HTMLButtonElement | HTMLSelectElement | HTMLTextAreaElement>("input,button,select,textarea"));
+    const disabled = controls.map(control => control.disabled);
+    controls.forEach(control => { control.disabled = true; });
+    const message = this.contentEl.querySelector<HTMLElement>(".story-map-submit-status") || this.contentEl.createEl("p", { cls: "story-map-submit-status", attr: { role: "alert" } });
+    message.setText(t("正在保存…"));
+    try {
+      if (await plugin.commitModal(action)) { this.saving = false; this.close(); return; }
+      message.setText(t(plugin.conflicted ? "地图已被外部修改，已停止保存；请先备份当前修改" : "保存失败，修改仍在内存中；请重试"));
+    } finally {
+      this.saving = false;
+      controls.forEach((control, index) => { control.disabled = disabled[index] || false; });
+    }
+  }
+  close(): void { if (!this.saving) super.close(); }
+}
+
+class MilestoneEditorModal extends SavingModal {
   constructor(private plugin: StoryMapPlugin, private release: Release) { super(plugin.app); }
   onOpen(): void {
-    this.contentEl.addClass("story-map-modal");
+    this.trackEditor(this.plugin);
+    this.contentEl.addClass("story-map-modal", "story-map-compact-dialog");
     this.contentEl.createEl("h2", { text: t("里程碑管理") });
     const field = (caption: string, value: string): HTMLInputElement => {
       const row = this.contentEl.createDiv("story-map-form-row");
@@ -211,24 +253,21 @@ class MilestoneEditorModal extends Modal {
     const name = field(t("里程碑名称"), this.release.title);
     const subtitle = field(t("里程碑说明"), this.release.subtitle);
     const actions = this.contentEl.createDiv("story-map-modal-actions");
-    const remove = actions.createEl("button", { text: t("删除里程碑") });
+    const remove = actions.createEl("button", { text: t("删除里程碑"), cls: "story-map-danger-action" });
     remove.disabled = this.plugin.data.stories.some(story => story.releaseId === this.release.id);
     if (remove.disabled) this.contentEl.createEl("p", { text: t("请先将 Story 移动到其他里程碑") });
     remove.onclick = () => {
       if (this.plugin.data.stories.some(story => story.releaseId === this.release.id)) return;
-      this.plugin.data.releases = this.plugin.data.releases.filter(item => item.id !== this.release.id);
-      void this.plugin.commit(); this.close();
+      void this.persist(this.plugin, () => { this.plugin.data.releases = this.plugin.data.releases.filter(item => item.id !== this.release.id); });
     };
     actions.createEl("button", { text: t("取消") }).onclick = () => this.close();
     const save = actions.createEl("button", { text: t("保存"), cls: "mod-cta" });
     name.oninput = () => { save.disabled = !name.value.trim(); };
     const submit = (): void => {
       if (!name.value.trim()) return;
-      if (this.release.title !== name.value.trim() || this.release.subtitle !== subtitle.value.trim()) {
+      void this.persist(this.plugin, () => {
         this.release.title = name.value.trim(); this.release.subtitle = subtitle.value.trim();
-        void this.plugin.commit();
-      }
-      this.close();
+      });
     };
     save.onclick = submit;
     this.contentEl.onkeydown = event => { if (event.key === "Enter" && !event.isComposing) { event.preventDefault(); submit(); } };
@@ -236,36 +275,47 @@ class MilestoneEditorModal extends Modal {
   }
 }
 
-class CreateItemModal extends Modal {
+class CreateItemModal extends SavingModal {
   constructor(private plugin: StoryMapPlugin, private heading: string, private save: (title: string, description: string) => void, private context = "", private description = false) { super(plugin.app); }
   onOpen(): void {
-    this.contentEl.addClass("story-map-modal"); this.contentEl.createEl("h2", { text: this.heading });
-    if (this.context) this.contentEl.createEl("p", { text: this.context });
-    const name = this.contentEl.createEl("input", { placeholder: this.heading, attr: { "aria-label": this.heading } });
-    const description = this.description ? this.contentEl.createEl("input", { placeholder: t("里程碑说明"), attr: { "aria-label": t("里程碑说明") } }) : undefined;
+    this.trackEditor(this.plugin);
+    this.contentEl.addClass("story-map-modal", "story-map-compact-dialog"); this.contentEl.createEl("h2", { text: this.heading });
+    if (this.context) this.contentEl.createEl("p", { text: this.context, cls: "story-map-modal-help" });
+    const nameRow = this.contentEl.createDiv("story-map-form-row");
+    const caption = this.description ? t("里程碑名称") : this.heading === t("添加 Activity") ? t("Activity 名称") : t("Task 名称");
+    nameRow.createEl("label", { text: caption });
+    const name = nameRow.createEl("input", { attr: { "aria-label": caption, "aria-required": "true" } });
+    let description: HTMLInputElement | undefined;
+    if (this.description) {
+      const row = this.contentEl.createDiv("story-map-form-row"); row.createEl("label", { text: t("里程碑说明") });
+      description = row.createEl("input", { attr: { "aria-label": t("里程碑说明") } });
+    }
     const actions = this.contentEl.createDiv("story-map-modal-actions");
     actions.createEl("button", { text: t("取消") }).onclick = () => this.close();
     const button = actions.createEl("button", { text: t("创建"), cls: "mod-cta" }); button.disabled = true;
     name.oninput = () => { button.disabled = !name.value.trim(); };
-    const submit = (): void => { if (!name.value.trim()) return; this.save(name.value.trim(), description?.value.trim() || ""); void this.plugin.commit(); this.close(); };
+    const submit = (): void => { if (!name.value.trim()) return; void this.persist(this.plugin, () => this.save(name.value.trim(), description?.value.trim() || "")); };
     button.onclick = submit;
     this.contentEl.onkeydown = event => { if (event.key === "Enter" && !event.isComposing) { event.preventDefault(); submit(); } };
     name.focus();
   }
 }
 
-class StoryEditorModal extends Modal {
+class StoryEditorModal extends SavingModal {
   constructor(private plugin: StoryMapPlugin, private story: Story, private saveStory?: (story: Story) => void) { super(plugin.app); }
   onOpen(): void {
+    this.trackEditor(this.plugin);
     const { contentEl } = this;
-    contentEl.addClass("story-map-modal");
+    contentEl.addClass("story-map-modal", "story-map-story-dialog");
     contentEl.createEl("h2", { text: this.saveStory ? t("添加故事") : t("编辑故事") });
+    contentEl.createEl("p", { cls: "story-map-modal-help", text: [this.plugin.data.activities.find(item => item.id === this.story.activityId)?.title, this.plugin.data.tasks.find(item => item.id === this.story.taskId)?.title, this.plugin.data.releases.find(item => item.id === this.story.releaseId)?.title].filter(Boolean).join(" → ") });
     const fields: Array<[string, keyof Story, "text" | "number" | "textarea"]> = [
       [t("故事标题"), "title", "text"], [t("故事描述"), "description", "textarea"], [t("估点"), "estimate", "number"]
     ];
     const controls: Partial<Record<keyof Story, HTMLInputElement | HTMLTextAreaElement>> = {};
     fields.forEach(([label, key, type]) => {
       const row = contentEl.createDiv("story-map-form-row"); row.createEl("label", { text: label });
+      row.addClass(`story-map-edit-${key}`);
       const control = type === "textarea" ? row.createEl("textarea") : row.createEl("input", { type });
       control.value = String(this.story[key] ?? ""); controls[key] = control;
     });
@@ -285,10 +335,19 @@ class StoryEditorModal extends Modal {
     prioritySelect.value = this.story.priority;
     const tagsRow = contentEl.createDiv("story-map-form-row"); tagsRow.createEl("label", { text: t("标签") });
     const tagsInput = tagsRow.createEl("input", { value: this.story.tags.join(", "), placeholder: t("用逗号分隔") });
+    const metadata = contentEl.createDiv("story-map-dialog-metadata");
+    const estimateRow = controls.estimate?.parentElement;
+    metadata.append(roleRow, statusRow, priorityRow);
+    if (estimateRow) metadata.append(estimateRow);
+    contentEl.append(noteRow, tagsRow);
     const actions = contentEl.createDiv("story-map-modal-actions");
     const cancel = actions.createEl("button", { text: t("取消") }); cancel.onclick = () => this.close();
     const save = actions.createEl("button", { text: t("保存"), cls: "mod-cta" });
+    save.disabled = !controls.title?.value.trim();
+    if (controls.title) controls.title.oninput = () => { save.disabled = !controls.title?.value.trim(); };
     save.onclick = () => {
+      if (!controls.title?.value.trim()) return;
+      void this.persist(this.plugin, () => {
       this.story.title = controls.title?.value.trim() || t("未命名故事");
       this.story.description = controls.description?.value.trim() || "";
       this.story.estimate = Math.max(0, Number(controls.estimate?.value) || 0);
@@ -298,11 +357,11 @@ class StoryEditorModal extends Modal {
       this.story.priority = prioritySelect.value as Story["priority"];
       this.story.tags = tagsInput.value.split(/[,，]/).map(item => item.trim()).filter(Boolean);
       if (this.saveStory) this.saveStory(this.story);
-      void this.plugin.commit(); this.close();
+      });
     };
     window.setTimeout(() => (controls.title as HTMLInputElement | undefined)?.select(), 0);
   }
-  onClose(): void { this.contentEl.empty(); }
+  onClose(): void { super.onClose(); this.contentEl.empty(); }
 }
 
 class StoryMapView extends FileView {
@@ -376,6 +435,7 @@ class StoryMapView extends FileView {
     status.createSpan({ text: t("{0} 个故事 · {1} 个活动 · {2} 个角色", data.stories.length, data.activities.length, data.roles.length) });
     status.createSpan({ text: this.plugin.saveStatusText(), cls: "story-map-save-status" });
     status.createEl("button", { text: t("保存"), attr: { "aria-label": t("立即保存或重试保存") } }).onclick = () => void this.plugin.commit(false);
+    if (this.plugin.conflicted) status.createEl("button", { text: t("文件冲突") }).onclick = () => new ConflictModal(this.plugin).open();
     viewport.scrollLeft = scrollLeft; viewport.scrollTop = scrollTop;
   }
 
@@ -535,7 +595,7 @@ class StoryMapView extends FileView {
     const desc = this.field(panel, t("描述")).createEl("textarea"); desc.value = story.description; desc.onchange = () => { story.description = desc.value; void this.plugin.commit(); };
     noteSelector(this.field(panel, t("关联笔记")), this.plugin, story.notePath, path => { story.notePath = path; void this.plugin.commit(); });
     const actions = panel.createDiv("story-map-inspector-actions");
-    const open = actions.createEl("button", { text: story.notePath ? t("打开笔记") : t("创建笔记") }); open.onclick = () => void this.plugin.openStoryNote(story);
+    if (!story.notePath) actions.createEl("button", { text: t("创建笔记") }).onclick = () => void this.plugin.openStoryNote(story);
     const edit = actions.createEl("button", { text: t("编辑全部") }); edit.onclick = () => new StoryEditorModal(this.plugin, story).open();
   }
 
@@ -639,7 +699,49 @@ class StoryMapView extends FileView {
 export default class StoryMapPlugin extends Plugin {
   private mapFile: TFile | null = null;
   private sessionOwner: StoryMapPlugin | null = null;
-  private fileSessions = new WeakMap<TFile, Promise<StoryMapPlugin>>();
+  private fileSessions = new Map<TFile, Promise<StoryMapPlugin>>();
+  private diskSnapshot: string | undefined;
+  conflicted = false;
+  activeEditors = 0;
+  private pendingWrites = 0;
+  private noteRenameQueue: Promise<void> = Promise.resolve();
+  async refreshExternal(): Promise<void> {
+    if (!this.mapFile || this.pendingWrites) return;
+    const raw = await this.app.vault.read(this.mapFile);
+    if (this.pendingWrites) return;
+    if (raw === this.diskSnapshot) return;
+    if (this.activeEditors || (this.diskSnapshot !== undefined && JSON.stringify(this.data) !== JSON.stringify(this.parseMap(this.diskSnapshot)))) {
+      this.conflicted = true; this.saveStatus = "地图已被外部修改，已停止保存；请先备份当前修改"; this.refresh(); return;
+    }
+    this.data = this.parseMap(raw); this.diskSnapshot = raw; this.lastSerialized = JSON.stringify(this.data);
+    this.history = []; this.future = []; this.conflicted = false; this.refresh();
+  }
+  async resolveConflict(): Promise<void> {
+    if (!this.mapFile) return;
+    await this.saveQueue;
+    const raw = await this.app.vault.read(this.mapFile);
+    const data = this.parseMap(raw);
+    const path = this.mapFile.path.replace(/\.storymap$/i, `-conflict-${uid("backup")}.storymap`);
+    await this.app.vault.create(path, JSON.stringify(this.data, null, 2));
+    this.data = data; this.diskSnapshot = raw; this.lastSerialized = JSON.stringify(data);
+    this.history = []; this.future = []; this.conflicted = false;
+    this.saveStatus = "已载入 .story-map.json"; this.refresh(); new Notice(path);
+  }
+  async updateNotePaths(oldPath: string, newPath: string): Promise<void> {
+    const update = (data: StoryMapData): boolean => {
+      let changed = false;
+      for (const story of data.stories) if (story.notePath === oldPath || story.notePath?.startsWith(oldPath + "/")) {
+        story.notePath = newPath + story.notePath.slice(oldPath.length); changed = true;
+      }
+      return changed;
+    };
+    if (update(this.data)) await this.commit(false);
+    for (const file of this.app.vault.getFiles().filter(file => file.extension === "storymap")) {
+      const pending = this.fileSessions.get(file);
+      if (pending) { const session = await pending; if (update(session.data)) await session.commit(false); }
+      else await this.app.vault.process(file, raw => { const data = this.parseMap(raw); return update(data) ? JSON.stringify(data, null, 2) : raw; });
+    }
+  }
   async fileSession(file: TFile): Promise<StoryMapPlugin> {
     const owner = this.sessionOwner || this;
     const existing = owner.fileSessions.get(file);
@@ -649,12 +751,14 @@ export default class StoryMapPlugin extends Plugin {
     try { return await pending; } catch (cause) { owner.fileSessions.delete(file); throw cause; }
   }
   private async loadFileSession(file: TFile): Promise<StoryMapPlugin> {
-    const data = this.parseMap(await this.app.vault.read(file));
+    const raw = await this.app.vault.read(file);
+    const data = this.parseMap(raw);
     const session = new StoryMapPlugin(this.app, this.manifest);
     session.sessionOwner = this.sessionOwner || this;
     session.mapFile = file; session.mapPath = file.path; session.data = data;
     session.language = this.language; session.exportFormat = this.exportFormat;
     session.lastSerialized = JSON.stringify(data);
+    session.diskSnapshot = raw;
     return session;
   }
   async createMapFile(folder: TFolder, title: string, sample = false): Promise<void> {
@@ -711,6 +815,17 @@ export default class StoryMapPlugin extends Plugin {
     await this.loadMap();
     this.registerView(VIEW_TYPE, leaf => new StoryMapView(leaf, this));
     this.registerExtensions(["storymap"], VIEW_TYPE);
+    this.registerEvent(this.app.vault.on("modify", file => {
+      if (file instanceof TFile) {
+        const pending = this.fileSessions.get(file);
+        if (pending) void pending.then(session => session.refreshExternal()).catch(() => new Notice(t("文件冲突")));
+      }
+    }));
+    this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
+      if (file instanceof TFolder || (file instanceof TFile && file.extension === "md")) {
+        this.noteRenameQueue = this.noteRenameQueue.then(() => this.updateNotePaths(oldPath, file.path)).catch(() => { new Notice(t("关联笔记更新失败")); });
+      }
+    }));
     this.registerEvent(this.app.workspace.on("file-menu", (menu, file) => {
       if (file instanceof TFolder) menu.setUseNativeMenu(false).addItem(item => item.setSection("action-primary").setTitle(t("新建故事地图")).setIcon("map").onClick(() => new CreateMapFileModal(this, file).open()));
     }));
@@ -739,6 +854,24 @@ export default class StoryMapPlugin extends Plugin {
     this.lastSerialized = JSON.stringify(this.data);
   }
   private snapshot(): void { this.history.push(this.lastSerialized); if (this.history.length > 50) this.history.shift(); this.future = []; }
+  async commitModal(action: () => void): Promise<boolean> {
+    const before = JSON.stringify(this.data);
+    const history = [...this.history], future = [...this.future], serialized = this.lastSerialized;
+    const arrays = { activities: [...this.data.activities], tasks: [...this.data.tasks], releases: [...this.data.releases], stories: [...this.data.stories], roles: [...this.data.roles] };
+    action();
+    if (await this.commit()) return true;
+    const restored = JSON.parse(before) as StoryMapData;
+    for (const key of ["activities", "tasks", "releases", "stories", "roles"] as const) {
+      arrays[key].forEach((item, index) => {
+        for (const property of Object.keys(item)) if (!(property in restored[key][index]!)) Reflect.deleteProperty(item, property);
+        Object.assign(item, restored[key][index]);
+      });
+    }
+    Object.assign(this.data, restored, arrays);
+    this.history = history; this.future = future; this.lastSerialized = serialized;
+    this.refresh();
+    return false;
+  }
   async commit(track = true): Promise<boolean> {
     if (this.loadFailed) { new Notice(t(this.saveStatus)); return false; }
     if (track) this.snapshot();
@@ -748,27 +881,41 @@ export default class StoryMapPlugin extends Plugin {
     const file = this.mapFile;
     let saved = false;
     const revision = ++this.saveRevision;
+    this.pendingWrites++;
     this.saveStatus = "正在保存…";
     this.refresh();
     this.saveQueue = this.saveQueue.then(async () => {
       try {
         if (file) {
           if (this.app.vault.getAbstractFileByPath(file.path) !== file) throw new Error("Map file was removed");
-          await this.app.vault.modify(file, payload);
+          await this.app.vault.process(file, current => {
+            if (current !== this.diskSnapshot) throw new Error("external-map-change");
+            return payload;
+          });
+          this.diskSnapshot = payload;
           this.mapPath = file.path;
         } else await this.app.vault.adapter.write(path, payload);
         saved = true;
+        this.conflicted = false;
         if (revision === this.saveRevision) this.saveStatus = "已保存到 .story-map.json";
-      } catch {
-        if (revision === this.saveRevision) this.saveStatus = "保存失败，修改仍在内存中；请重试";
-        new Notice(t("故事地图保存失败，请检查磁盘和文件权限。修改仍在内存中，请勿关闭插件。"), 10000);
+      } catch (cause) {
+        if (cause instanceof Error && cause.message === "external-map-change") {
+          this.conflicted = true;
+          this.saveStatus = "地图已被外部修改，已停止保存；请先备份当前修改";
+          new Notice(t(this.saveStatus), 10000);
+        } else {
+          if (revision === this.saveRevision) this.saveStatus = "保存失败，修改仍在内存中；请重试";
+          new Notice(t("故事地图保存失败，请检查磁盘和文件权限。修改仍在内存中，请勿关闭插件。"), 10000);
+        }
       }
+      this.pendingWrites--;
       this.app.workspace.getLeavesOfType(VIEW_TYPE).forEach(leaf => {
         const status = leaf.view.containerEl.querySelector(".story-map-save-status");
         if (status && leaf.view instanceof StoryMapView && leaf.view.owns(this)) status.textContent = this.saveStatusText();
       });
     });
     await this.saveQueue;
+    if (this.conflicted) this.refresh();
     return saved;
   }
   async listMaps(): Promise<Array<{ path: string; data: StoryMapData }>> {
@@ -894,6 +1041,9 @@ export default class StoryMapPlugin extends Plugin {
     new Notice(t("已导出 XMind：{0}", path), 6000);
   }
   async openStoryNote(story: Story): Promise<void> {
+    if (story.notePath && !(this.app.vault.getAbstractFileByPath(story.notePath) instanceof TFile)) {
+      new Notice(t("关联笔记不存在，请重新关联")); return;
+    }
     const path = normalizePath(story.notePath || t("故事/{0}.md", story.title)); story.notePath = path;
     let file = this.app.vault.getAbstractFileByPath(path);
     if (!(file instanceof TFile)) {

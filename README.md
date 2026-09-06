@@ -4,7 +4,11 @@ English · [简体中文](README.zh-CN.md)
 
 Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
 
-**[Download 1.4.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.4.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.4.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.4.1)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+
+### 1.4.1
+
+Refined compact dialogs, two-column story forms and narrow layouts. Failed saves keep form input and retries do not duplicate new items. Independent `.storymap` files detect external changes and offer backup-and-reload recovery. Note renames and moves while the plugin is enabled update map links; missing linked notes are no longer silently recreated.
 
 ### New in 1.4.0
 

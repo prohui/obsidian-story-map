@@ -1,5 +1,11 @@
 // Columns: source key, Traditional Chinese, Japanese, Korean, German, French, Spanish.
-const rows = `搜索笔记|搜尋筆記|ノートを検索|노트 검색|Notizen suchen|Rechercher des notes|Buscar notas
+const rows = `文件冲突|檔案衝突|ファイルの競合|파일 충돌|Dateikonflikt|Conflit de fichier|Conflicto de archivo
+备份并重新加载|備份並重新載入|バックアップして再読み込み|백업 후 다시 불러오기|Sichern und neu laden|Sauvegarder et recharger|Respaldar y recargar
+保留双方版本：先将当前地图另存为副本，再加载磁盘版本。|保留雙方版本：先將目前地圖另存副本，再載入磁碟版本。|現在のマップをコピーとして保存してからディスク版を読み込み、両方を保持します。|현재 지도를 복사본으로 저장한 후 디스크 버전을 불러와 두 버전을 유지합니다.|Beide Versionen behalten: aktuelle Map kopieren, dann Datenträgerversion laden.|Conserver les deux versions : copier la carte actuelle, puis charger la version sur disque.|Conserva ambas versiones: copia el mapa actual y carga la versión del disco.
+关联笔记更新失败|關聯筆記更新失敗|リンクの更新に失敗しました|연결된 노트 업데이트 실패|Notizverknüpfungen konnten nicht aktualisiert werden|Échec de mise à jour des liens|No se pudieron actualizar los enlaces
+地图已被外部修改，已停止保存；请先备份当前修改|地圖已被外部修改，已停止儲存；請先備份目前修改|外部で変更されました。保存を停止しました。編集内容をバックアップしてください。|외부에서 변경되었습니다. 저장을 중단했습니다. 먼저 편집 내용을 백업하세요.|Extern geändert. Speichern gestoppt; Änderungen zuerst sichern.|Carte modifiée ailleurs. Enregistrement arrêté ; sauvegardez vos modifications.|Mapa modificado externamente. Guardado detenido; respalda tus cambios.
+关联笔记不存在，请重新关联|關聯筆記不存在，請重新關聯|リンク先がありません。再選択してください。|연결된 노트가 없습니다. 다시 연결하세요.|Verknüpfte Notiz fehlt. Bitte neu verknüpfen.|La note liée est introuvable. Veuillez la remplacer.|La nota vinculada no existe. Vuelve a vincularla.
+搜索笔记|搜尋筆記|ノートを検索|노트 검색|Notizen suchen|Rechercher des notes|Buscar notas
 解除关联|解除關聯|リンクを解除|연결 해제|Verknüpfung lösen|Dissocier|Desvincular
 模板|範本|テンプレート|템플릿|Vorlage|Modèle|Plantilla
 轻量模板|精簡範本|シンプルなテンプレート|간단한 템플릿|Einfache Vorlage|Modèle simple|Plantilla sencilla

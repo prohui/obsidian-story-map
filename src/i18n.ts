@@ -17,6 +17,9 @@ export function setLocale(language: Language, hostLanguage = "en"): void {
 }
 
 export const english: Record<string, string> = {
+  "文件冲突": "File conflict", "备份并重新加载": "Back up and reload", "保留双方版本：先将当前地图另存为副本，再加载磁盘版本。": "Keep both versions: save a copy of the current map, then load the disk version.", "关联笔记更新失败": "Could not update linked notes",
+  "地图已被外部修改，已停止保存；请先备份当前修改": "Map changed externally. Saving stopped; back up your current edits first.",
+  "关联笔记不存在，请重新关联": "Linked note is missing. Please link another note.",
   "搜索笔记": "Search notes", "解除关联": "Unlink",
   "模板": "Template", "轻量模板": "Starter template", "新活动": "New activity", "Enter 保存 · Esc 取消": "Enter to save · Esc to cancel",
   "新建故事地图": "New story map",

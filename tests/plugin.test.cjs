@@ -19,9 +19,21 @@ function createPlugin(adapter = {}) {
   vm.runInNewContext(fs.readFileSync(require.resolve('../main.js'), 'utf8'), context);
   const Plugin = context.module.exports.default;
   const plugin = new Plugin();
-  plugin.app = { vault: { adapter }, workspace: { getLeavesOfType: () => [], on:()=>({}) } };
+  plugin.app = { vault: { adapter, on:()=>({}) }, workspace: { getLeavesOfType: () => [], on:()=>({}) } };
   return { plugin, notices };
 }
+
+test('modal save failure rolls back creation and edits; retry creates exactly once', async()=>{
+  let fail=true;
+  const {plugin}=createPlugin({write:async()=>{if(fail)throw Error('disk full');}});
+  const release=plugin.data.releases[0], title=release.title, count=plugin.data.activities.length;
+  const action=()=>{release.title='Edited';plugin.data.activities.push({id:'new',title:'New'});};
+  assert.equal(await plugin.commitModal(action),false);
+  assert.equal(release.title,title);assert.equal(plugin.data.activities.length,count);
+  fail=false;assert.equal(await plugin.commitModal(action),true);
+  assert.equal(plugin.data.activities.length,count+1);assert.equal(release.title,'Edited');
+  plugin.undo();assert.equal(plugin.data.activities.length,count);
+});
 
 test('multiple maps isolate data, preserve legacy, duplicate and archive safely', async () => {
   const files = new Map(); const folders = new Set();
@@ -87,13 +99,39 @@ test('storymap file sessions are isolated and follow renamed file handles', asyn
   const a={path:'A.storymap'},b={path:'B.storymap'};const files=new Map([[a,JSON.stringify(plugin.data)],[b,JSON.stringify(plugin.data)]]);
   plugin.app.vault.read=async f=>files.get(f);
   plugin.app.vault.modify=async(f,payload)=>files.set(f,payload);
+  plugin.app.vault.process=async(f,fn)=>{const next=fn(files.get(f));files.set(f,next);};
   plugin.app.vault.getAbstractFileByPath=p=>[a,b].find(f=>f.path===p);
   const sa=await plugin.fileSession(a), sb=await plugin.fileSession(b);
   assert.equal(await plugin.fileSession(a),sa);assert.notEqual(sa,sb);
   a.path='Moved/A.storymap';sa.data.title='Only A';await sa.commit();
   assert.equal(JSON.parse(files.get(a)).title,'Only A');assert.notEqual(JSON.parse(files.get(b)).title,'Only A');assert.equal(sa.mapPath,a.path);
+  files.set(a,JSON.stringify({...JSON.parse(files.get(a)),title:'External'}));
+  sa.data.title='Local';assert.equal(await sa.commit(),false);
+  assert.equal(JSON.parse(files.get(a)).title,'External');
   plugin.app.vault.getAbstractFileByPath=()=>null;
   assert.equal(await sa.commit(),false);
+});
+
+test('external changes reload clean sessions and conflict recovery preserves both versions',async()=>{
+  const {plugin}=createPlugin();const file={path:'A.storymap'};let disk=JSON.stringify(plugin.data);const backups=[];
+  plugin.app.vault.read=async()=>disk;
+  plugin.app.vault.create=async(path,raw)=>{backups.push({path,raw});return {path};};
+  const session=await plugin.fileSession(file);
+  disk=JSON.stringify({...plugin.data,title:'External one'});await session.refreshExternal();
+  assert.equal(session.data.title,'External one');
+  session.data.title='Local';disk=JSON.stringify({...plugin.data,title:'External two'});
+  await session.refreshExternal();assert.equal(session.conflicted,true);
+  await session.resolveConflict();assert.equal(session.data.title,'External two');
+  assert.equal(JSON.parse(backups[0].raw).title,'Local');assert.equal(JSON.parse(disk).title,'External two');
+});
+
+test('note rename updates unopened maps and respects path boundaries',async()=>{
+  const {plugin}=createPlugin({write:async()=>{}});const file={path:'A.storymap',extension:'storymap'};
+  const data=JSON.parse(JSON.stringify(plugin.data));data.stories[0].notePath='Folder/Note.md';data.stories[1].notePath='Folder2/Other.md';
+  let disk=JSON.stringify(data);plugin.app.vault.getFiles=()=>[file];plugin.app.vault.process=async(_,fn)=>{disk=fn(disk);};
+  await plugin.updateNotePaths('Folder','Moved');
+  assert.equal(JSON.parse(disk).stories[0].notePath,'Moved/Note.md');
+  assert.equal(JSON.parse(disk).stories[1].notePath,'Folder2/Other.md');
 });
 
 test('failed export does not poison the next export or modify source data',async()=>{
