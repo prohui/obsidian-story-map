@@ -10,7 +10,7 @@ function createPlugin(adapter = {}) {
     module: { exports: {} }, exports: {}, console, setTimeout, clearTimeout,
     setImmediate, Uint8Array, ArrayBuffer, TextEncoder,
     require: id => id === 'obsidian' ? {
-      Plugin: class { async saveData() {} }, ItemView: class {}, Modal: class {},
+      Plugin: class { constructor(app, manifest) { this.app=app; this.manifest=manifest; } async saveData() {} registerExtensions() {} registerEvent() {} }, FileView: class {}, Modal: class {}, FuzzySuggestModal: class {},
       getLanguage: () => 'en',
       Notice: class { constructor(message) { notices.push(message); } },
       normalizePath: path => path,
@@ -19,9 +19,33 @@ function createPlugin(adapter = {}) {
   vm.runInNewContext(fs.readFileSync(require.resolve('../main.js'), 'utf8'), context);
   const Plugin = context.module.exports.default;
   const plugin = new Plugin();
-  plugin.app = { vault: { adapter }, workspace: { getLeavesOfType: () => [] } };
+  plugin.app = { vault: { adapter }, workspace: { getLeavesOfType: () => [], on:()=>({}) } };
   return { plugin, notices };
 }
+
+test('multiple maps isolate data, preserve legacy, duplicate and archive safely', async () => {
+  const files = new Map(); const folders = new Set();
+  const {plugin} = createPlugin({exists:async p=>files.has(p)||folders.has(p), mkdir:async p=>folders.add(p), read:async p=>{if(!files.has(p))throw Error('missing');return files.get(p)}, write:async(p,v)=>files.set(p,v), list:async()=>({files:[...files.keys()].filter(p=>p.startsWith('.story-maps/'))})});
+  plugin.data.title='Original'; await plugin.commit(false); const original=files.get('.story-map.json');
+  await plugin.createMap('Blank','blank'); const blank=plugin.mapPath;
+  assert.equal(plugin.data.stories.length,0); assert.equal(files.get('.story-map.json'),original);
+  plugin.data.roles.push({id:'test',name:'Unique',description:''}); await plugin.commit();
+  await plugin.createMap('Copy','copy'); assert.notEqual(plugin.mapPath,blank); assert.equal(plugin.data.roles[0].name,'Unique');
+  await plugin.switchMap('.story-map.json'); assert.equal(plugin.data.title,'Original');
+  await plugin.archiveMap(blank,true); assert.equal(JSON.parse(files.get(blank)).archived,true);
+  await plugin.archiveMap(blank,false); assert.equal(JSON.parse(files.get(blank)).archived,false);
+  await assert.rejects(plugin.switchMap('../outside.json'));
+  assert.equal((await plugin.listMaps()).length,3);
+});
+
+test('failed save prevents map creation or switch; corrupt target preserves current data', async()=>{
+  let fail=false;const files=new Map();
+  const {plugin}=createPlugin({exists:async p=>files.has(p),read:async p=>files.get(p),write:async(p,v)=>{if(fail)throw Error('disk');files.set(p,v)}});
+  const before=JSON.stringify(plugin.data); fail=true;
+  await assert.rejects(plugin.createMap('Blocked','blank')); assert.equal(plugin.mapPath,'.story-map.json');
+  fail=false;files.set('.story-maps/broken.json','{}');
+  await assert.rejects(plugin.switchMap('.story-maps/broken.json')); assert.equal(JSON.stringify(plugin.data),before);
+});
 
 test('JSON export preserves full map data and numbers concurrent filenames', async () => {
   const files = new Map();
@@ -32,6 +56,44 @@ test('JSON export preserves full map data and numbers concurrent filenames', asy
   assert.ok([...files.keys()].some(path=>path.endsWith('-2.json')));
   for(const content of files.values()) assert.deepEqual(JSON.parse(content),JSON.parse(original));
   assert.equal(JSON.stringify(plugin.data),original);
+});
+
+test('new storymap files start with an independent complete template', async()=>{
+  const {plugin}=createPlugin(); const files=new Map(); let opened;
+  const original=JSON.stringify(plugin.data);
+  plugin.app.vault.create=async(path,payload)=>{if(files.has(path))throw Error('exists');files.set(path,payload);return {path};};
+  plugin.app.workspace.getLeaf=()=>({openFile:async file=>{opened=file.path;}});
+  const folder={path:'Projects',isRoot:()=>false};
+  await plugin.createMapFile(folder,'First',true);
+  const data=JSON.parse(files.get('Projects/First.storymap'));
+  assert.equal(opened,'Projects/First.storymap');assert.equal(data.title,'First');
+  for(const key of ['activities','tasks','stories','roles','releases'])assert.ok(data[key].length>0,key);
+  for(const story of data.stories){
+    assert.ok(data.tasks.some(task=>task.id===story.taskId && task.activityId===story.activityId));
+    assert.ok(data.releases.some(release=>release.id===story.releaseId));
+    assert.equal(story.notePath,undefined);assert.equal(story.status,'planned');
+  }
+  await plugin.createMapFile(folder,'Second');
+  const starter=JSON.parse(files.get('Projects/Second.storymap'));
+  assert.equal(starter.activities.length,1);assert.equal(starter.tasks.length,1);
+  assert.equal(starter.releases.length,1);assert.equal(starter.stories.length,0);assert.equal(starter.roles.length,0);
+  assert.equal(JSON.stringify(plugin.data),original);
+  await assert.rejects(plugin.createMapFile(folder,'First'),/exists/);
+  assert.equal(JSON.parse(files.get('Projects/First.storymap')).title,'First');
+});
+
+test('storymap file sessions are isolated and follow renamed file handles', async()=>{
+  const {plugin}=createPlugin();
+  const a={path:'A.storymap'},b={path:'B.storymap'};const files=new Map([[a,JSON.stringify(plugin.data)],[b,JSON.stringify(plugin.data)]]);
+  plugin.app.vault.read=async f=>files.get(f);
+  plugin.app.vault.modify=async(f,payload)=>files.set(f,payload);
+  plugin.app.vault.getAbstractFileByPath=p=>[a,b].find(f=>f.path===p);
+  const sa=await plugin.fileSession(a), sb=await plugin.fileSession(b);
+  assert.equal(await plugin.fileSession(a),sa);assert.notEqual(sa,sb);
+  a.path='Moved/A.storymap';sa.data.title='Only A';await sa.commit();
+  assert.equal(JSON.parse(files.get(a)).title,'Only A');assert.notEqual(JSON.parse(files.get(b)).title,'Only A');assert.equal(sa.mapPath,a.path);
+  plugin.app.vault.getAbstractFileByPath=()=>null;
+  assert.equal(await sa.commit(),false);
 });
 
 test('failed export does not poison the next export or modify source data',async()=>{

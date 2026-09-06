@@ -23,6 +23,7 @@ export interface Release { id: string; title: string; subtitle: string; }
 export interface Role { id: string; name: string; description: string; }
 
 export interface StoryMapData {
+  archived?: boolean;
   version: 1;
   title: string;
   zoom: number;

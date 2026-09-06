@@ -4,7 +4,11 @@ English · [简体中文](README.zh-CN.md)
 
 Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
 
-**[Download 1.3.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.3.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.4.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.4.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+
+### New in 1.4.0
+
+Right-click a folder → New story map, then choose a starter template or sample. Each map is an independent `.storymap` file containing JSON; legacy maps remain supported. Create activities, tasks, stories and milestones through dialogs. Click a milestone to edit it; milestones containing stories cannot be deleted. Search, select and unlink existing notes.
 
 ![Story Map running in Obsidian with activities, tasks, milestone lanes, role labels, and the story details panel](docs/images/obsidian-en.png)
 

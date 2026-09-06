@@ -8,7 +8,7 @@ const context = {
   module: { exports: {} }, exports: {}, console, setTimeout, clearTimeout,
   setImmediate, Uint8Array, ArrayBuffer,
   require: id => id === 'obsidian' ? {
-    Plugin: class {}, ItemView: class {}, Modal: class {},
+    Plugin: class {}, FileView: class {}, Modal: class {}, FuzzySuggestModal: class {},
     Notice: class {}, normalizePath: value => value,
   } : require(id),
 };

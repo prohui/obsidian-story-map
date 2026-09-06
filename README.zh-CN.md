@@ -4,7 +4,11 @@
 
 在 Obsidian 中规划用户旅程、拆分用户故事和安排发布里程碑。地图保存在你的 Vault 中，故事卡可以关联 Markdown 笔记，也可以导出为 XMind 脑图。
 
-**[下载 1.3.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.3.0)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
+**[下载 1.4.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.4.0)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
+
+### 1.4.0 更新
+
+右键文件夹 → 新建故事地图，可选择轻量模板或完整示例。每张地图保存为独立的 `.storymap` 文件（JSON 内容），旧地图继续兼容。新增活动、任务、故事和里程碑使用弹窗；点击里程碑可编辑，含故事的里程碑不能删除。关联笔记支持搜索、选择和解除关联。
 
 ![Obsidian 中的故事地图：活动、任务、发布里程碑、角色标签与右侧故事详情](docs/images/obsidian-zh.png)
 

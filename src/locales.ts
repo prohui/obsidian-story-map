@@ -1,5 +1,20 @@
 // Columns: source key, Traditional Chinese, Japanese, Korean, German, French, Spanish.
-const rows = `文件名|檔案名稱|ファイル名|파일 이름|Dateiname|Nom du fichier|Nombre del archivo
+const rows = `搜索笔记|搜尋筆記|ノートを検索|노트 검색|Notizen suchen|Rechercher des notes|Buscar notas
+解除关联|解除關聯|リンクを解除|연결 해제|Verknüpfung lösen|Dissocier|Desvincular
+模板|範本|テンプレート|템플릿|Vorlage|Modèle|Plantilla
+轻量模板|精簡範本|シンプルなテンプレート|간단한 템플릿|Einfache Vorlage|Modèle simple|Plantilla sencilla
+新活动|新活動|新しいアクティビティ|새 활동|Neue Aktivität|Nouvelle activité|Nueva actividad
+Enter 保存 · Esc 取消|Enter 儲存 · Esc 取消|Enter で保存 · Esc でキャンセル|Enter 저장 · Esc 취소|Enter speichern · Esc abbrechen|Entrée enregistrer · Échap annuler|Enter guardar · Esc cancelar
+文件名|檔案名稱|ファイル名|파일 이름|Dateiname|Nom du fichier|Nombre del archivo
+新建故事地图|新增故事地圖|ストーリーマップを作成|스토리 맵 만들기|Neue Story Map|Nouvelle carte de récits|Nuevo mapa de historias
+地图管理|地圖管理|マップ管理|지도 관리|Maps verwalten|Gérer les cartes|Gestionar mapas
+新建空白地图|新增空白地圖|空のマップを作成|빈 지도 만들기|Neue leere Map|Nouvelle carte vide|Nuevo mapa vacío
+从示例新建|從範例新增|サンプルから作成|예제로 만들기|Aus Beispiel erstellen|Créer depuis un exemple|Crear desde ejemplo
+复制当前地图|複製目前地圖|現在のマップを複製|현재 지도 복제|Aktuelle Map duplizieren|Dupliquer la carte|Duplicar mapa actual
+已归档|已封存|アーカイブ済み|보관됨|Archiviert|Archivée|Archivado
+恢复地图|還原地圖|マップを復元|지도 복원|Map wiederherstellen|Restaurer la carte|Restaurar mapa
+归档地图|封存地圖|マップをアーカイブ|지도 보관|Map archivieren|Archiver la carte|Archivar mapa
+打开|開啟|開く|열기|Öffnen|Ouvrir|Abrir
 保存位置|儲存位置|保存先|저장 위치|Speicherort|Emplacement|Ubicación
 系统另存为（桌面、下载或其他目录）|系統另存新檔（桌面、下載或其他目錄）|システムの名前を付けて保存（デスクトップなど）|시스템 다른 이름으로 저장 (바탕화면 등)|Systemdialog (Desktop, Downloads oder anderer Ordner)|Dialogue système (Bureau, Téléchargements ou autre dossier)|Diálogo del sistema (Escritorio, Descargas u otra carpeta)
 Obsidian 库内导出文件夹|Obsidian 庫內匯出資料夾|Obsidian 保管庫内の出力フォルダー|Obsidian 보관함 내 내보내기 폴더|Exportordner im Obsidian-Vault|Dossier d’export dans le coffre Obsidian|Carpeta de exportación en la bóveda Obsidian
