@@ -14,6 +14,7 @@ export interface Story {
   estimate: number;
   tags: string[];
   notePath?: string;
+  attachments?: TaskAttachment[];
   color: StoryColor;
   roleId?: string;
 }

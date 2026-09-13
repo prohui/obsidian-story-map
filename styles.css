@@ -316,3 +316,16 @@
 .sm-detail-shortcut { display: none; }
 .sm-detail-footer { padding: 10px 16px; }
 @media (hover: none) { .sm-detail-root .sm-detail-attachment-remove { opacity: 1; } }
+
+.sm-story-attachments { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.sm-story-attachment { position: relative; min-width: 0; max-width: 220px; }
+.sm-story-attachment-open { display: flex; align-items: center; gap: 6px; max-width: 100%; height: 32px; padding: 4px 9px; border-radius: 6px; font-size: 11px; }
+.sm-story-attachment-open span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sm-story-attachment-open svg { width: 14px; height: 14px; }
+.sm-story-attachment.is-image .sm-story-attachment-open { width: 54px; height: 44px; padding: 0; overflow: hidden; }
+.sm-story-attachment-open img { width: 100%; height: 100%; object-fit: cover; }
+.sm-story-attachment-remove { position: absolute; right: -6px; top: -7px; width: 19px; height: 19px; min-width: 19px; padding: 0; opacity: 0; border-radius: 50%; background: var(--background-secondary); }
+.sm-story-attachment-remove svg { width: 12px; height: 12px; }
+.sm-story-attachment:hover .sm-story-attachment-remove, .sm-story-attachment:focus-within .sm-story-attachment-remove { opacity: 1; }
+.sm-story-attachment-add { width: 30px; height: 30px; padding: 5px; border: 1px dashed var(--background-modifier-border); }
+@media (hover: none) { .sm-story-attachment-remove { opacity: 1; } }

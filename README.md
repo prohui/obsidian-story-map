@@ -8,7 +8,7 @@ Plan user journeys, organize stories, and define release milestones inside Obsid
 
 ### 1.5.0
 
-Compact Story details with growing descriptions and collapsed secondary properties. Task and Activity descriptions support basic rich text and vault images in a narrow panel, with formatting controls shown while editing. Attachments use thumbnails and filename chips. Tasks support custom colors and a separate add-task column.
+Compact Story details with growing descriptions and collapsed secondary properties. Stories support importing attachments or selecting vault files through the + button below the description; removing an attachment only unlinks it. Task and Activity descriptions support basic rich text and vault images in a narrow panel, with formatting controls shown while editing. Attachments use thumbnails and filename chips. Tasks support custom colors and a separate add-task column.
 
 ### 1.4.1
 

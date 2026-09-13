@@ -7,6 +7,7 @@ import { pickerWindow, pickExportFile, writeExportFile, exportFilename } from ".
 import type { Activity, Release, Story, StoryMapData, Task } from "./types";
 import { autoSizeDescription } from "./auto-size";
 import { ActivityEditorModal, TaskEditorModal, taskT } from "./task-editor";
+import { renderStoryAttachments } from "./story-attachments";
 import { renameTaskFiles } from "./task-content";
 import { isTaskColor } from "./task-colors";
 
@@ -314,7 +315,7 @@ class StoryEditorModal extends SavingModal {
     contentEl.addClass("story-map-modal", "story-map-story-dialog");
     contentEl.createEl("h2", { text: this.saveStory ? t("添加故事") : t("编辑故事") });
     contentEl.createEl("p", { cls: "story-map-modal-help", text: [this.plugin.data.activities.find(item => item.id === this.story.activityId)?.title, this.plugin.data.tasks.find(item => item.id === this.story.taskId)?.title, this.plugin.data.releases.find(item => item.id === this.story.releaseId)?.title].filter(Boolean).join(" → ") });
-    const fields: Array<[string, keyof Story, "text" | "number" | "textarea"]> = [
+    const fields: Array<[string, "title" | "description" | "estimate", "text" | "number" | "textarea"]> = [
       [t("故事标题"), "title", "text"], [t("故事描述"), "description", "textarea"], [t("估点"), "estimate", "number"]
     ];
     const controls: Partial<Record<keyof Story, HTMLInputElement | HTMLTextAreaElement>> = {};
@@ -618,6 +619,7 @@ class StoryMapView extends FileView {
     desc.value = story.description;
     this.disposeDescription = autoSizeDescription(desc);
     desc.onchange = () => { story.description = desc.value; void this.plugin.commit(); };
+    renderStoryAttachments(panel, this.plugin, story);
     const more = panel.createEl("details", { cls: "story-map-more-properties" });
     more.createEl("summary", { text: taskT("更多属性") });
     this.selectField(more, t("优先级"), story.priority, [["low", t("低")], ["medium", t("中")], ["high", t("高")]], v => { story.priority = v as Story["priority"]; });
@@ -766,7 +768,7 @@ export default class StoryMapPlugin extends Plugin {
       for (const story of data.stories) if (story.notePath === oldPath || story.notePath?.startsWith(oldPath + "/")) {
         story.notePath = newPath + story.notePath.slice(oldPath.length); changed = true;
       }
-      for (const item of [...data.tasks, ...data.activities]) if (renameTaskFiles(item, oldPath, newPath)) changed = true;
+      for (const item of [...data.tasks, ...data.activities, ...data.stories]) if (renameTaskFiles(item, oldPath, newPath)) changed = true;
       return changed;
     };
     if (update(this.data)) await this.commit(false);
@@ -1047,7 +1049,7 @@ export default class StoryMapPlugin extends Plugin {
       const release = this.data.releases.find(item => item.id === story.releaseId);
       const taskItem = this.data.tasks.find(item => item.id === story.taskId);
       const activity = this.data.activities.find(item => item.id === story.activityId);
-      const details = [story.description, t("里程碑：{0}", release?.title || t("未分配")), includeLocation && activity ? t("活动：{0}", activity.title) : "", includeLocation && taskItem ? t("任务：{0}", taskItem.title) : "", t("状态：{0}", t(STATUS_LABELS[story.status])), t("优先级：{0}", t(PRIORITY_LABELS[story.priority])), t("估点：{0}", story.estimate), story.tags.length ? t("标签：{0}", story.tags.join("、")) : "", roles.length ? t("角色：{0}", roles.join("、")) : "", story.notePath ? t("关联笔记：{0}", story.notePath) : ""].filter(Boolean).join("\n");
+      const details = [story.description, ...(story.attachments || []).map(item => `${taskT("图片和文件")}: ${item.path}`), t("里程碑：{0}", release?.title || t("未分配")), includeLocation && activity ? t("活动：{0}", activity.title) : "", includeLocation && taskItem ? t("任务：{0}", taskItem.title) : "", t("状态：{0}", t(STATUS_LABELS[story.status])), t("优先级：{0}", t(PRIORITY_LABELS[story.priority])), t("估点：{0}", story.estimate), story.tags.length ? t("标签：{0}", story.tags.join("、")) : "", roles.length ? t("角色：{0}", roles.join("、")) : "", story.notePath ? t("关联笔记：{0}", story.notePath) : ""].filter(Boolean).join("\n");
       return topic(story.title, [], details, roles);
     };
     const activityTopics = this.data.activities.map(activity => topic(activity.title,

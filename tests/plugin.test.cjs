@@ -127,11 +127,12 @@ test('external changes reload clean sessions and conflict recovery preserves bot
 
 test('note rename updates unopened maps and respects path boundaries',async()=>{
   const {plugin}=createPlugin({write:async()=>{}});const file={path:'A.storymap',extension:'storymap'};
-  const data=JSON.parse(JSON.stringify(plugin.data));data.stories[0].notePath='Folder/Note.md';data.stories[1].notePath='Folder2/Other.md';
+  const data=JSON.parse(JSON.stringify(plugin.data));data.stories[0].notePath='Folder/Note.md';data.stories[0].attachments=[{path:'Folder/reference.png',kind:'reference'},{path:'Folder2/spec.pdf',kind:'dependency'}];data.stories[1].notePath='Folder2/Other.md';
   let disk=JSON.stringify(data);plugin.app.vault.getFiles=()=>[file];plugin.app.vault.process=async(_,fn)=>{disk=fn(disk);};
   await plugin.updateNotePaths('Folder','Moved');
   assert.equal(JSON.parse(disk).stories[0].notePath,'Moved/Note.md');
   assert.equal(JSON.parse(disk).stories[1].notePath,'Folder2/Other.md');
+  assert.deepEqual(JSON.parse(disk).stories[0].attachments,[{path:'Moved/reference.png',kind:'reference'},{path:'Folder2/spec.pdf',kind:'dependency'}]);
 });
 
 test('failed export does not poison the next export or modify source data',async()=>{
