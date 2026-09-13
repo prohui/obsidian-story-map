@@ -4,7 +4,15 @@
 
 在 Obsidian 中规划用户旅程、拆分用户故事和安排发布里程碑。地图保存在你的 Vault 中，故事卡可以关联 Markdown 笔记，也可以导出为 XMind 脑图。
 
-**[下载 1.4.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.4.1)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
+Task 和 Activity 支持所见即所得的描述与附件：点击标题打开详情，直接编辑标题、粗体、斜体、列表、可勾选待办、引用、链接和图片，无需切换源码与预览。界面采用紧凑的 Ant Design 控件，适配 Obsidian 深浅主题及窄窗口；Task 颜色可通过小色块选择。可以导入电脑文件、选择库内文件，或粘贴、拖入图片与文件；附件简化为图片缩略图和文件名，点击打开，通过 + 添加；旧附件用途数据继续保留。保存快捷键为 Cmd/Ctrl + Enter；右键仍可快速改名。编辑器使用 Tiptap，描述仍以 Markdown 存储，旧描述在未编辑时原样保留。
+
+导入的附件按 Obsidian 的附件设置立即保存在库内，取消编辑或移除关联不会删除文件。插件启用时，文件或文件夹改名会更新附件路径和正文中的完整路径双链。JSON 保留 Task / Activity 正文及附件引用，XMind 将其放入对应主题备注；附件文件本身仍需随库一起备份。旧地图无需迁移。
+
+**[下载 1.5.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.5.0)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
+
+### 1.5.0
+
+Story 直接在紧凑侧栏编辑，描述适应文字高度，次要字段折叠为“更多属性”。Task / Activity 使用右侧窄面板，正文仅在编辑时显示格式工具；附件显示为缩略图或文件名。添加 Task 使用独立列，支持自定义任务颜色。
 
 ### 1.4.1
 

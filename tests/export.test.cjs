@@ -3,7 +3,9 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const ts=require('typescript');
-const context={exports:{},TextEncoder,Uint8Array,require:()=>({t:(s)=>s})};
+const palette={exports:{}};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync(require.resolve('../src/task-colors.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,palette);
+const context={exports:{},TextEncoder,Uint8Array,require:id=>id==='./task-colors'?palette.exports:({t:(s)=>s})};
 vm.runInNewContext(ts.transpileModule(fs.readFileSync(require.resolve('../src/export.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,context);
 const {imagePdf,wrapText,renderMap}=context.exports;
 test('PDF has correct binary stream length, page ratio, and cross-reference offsets',()=>{
@@ -28,4 +30,11 @@ test('oversized visual export rejects before allocating a large canvas',async()=
   const data={title:'Large',activities:Array.from({length:100},(_,i)=>({id:String(i),title:'Activity'})),tasks:[],releases:[],stories:[],roles:[]};
   await assert.rejects(renderMap(data,{fonts:{ready:Promise.resolve()},body:{createEl:()=>canvas}}),/地图过大/);
   assert.equal(canvas.width,undefined);
+});
+test('visual exports preserve a selected task color and use neutral for older tasks',async()=>{
+ const fills=[];const ctx={measureText:s=>({width:s.length*10}),fillRect(){fills.push(this.fillStyle);},strokeRect(){},fillText(){}};
+ const canvas={getContext:()=>ctx,remove(){}};
+ const data={title:'Colors',activities:[{id:'a',title:'A'}],tasks:[{id:'t',activityId:'a',title:'Colored',color:'blue'},{id:'u',activityId:'a',title:'Legacy'}],releases:[],stories:[],roles:[]};
+ await renderMap(data,{fonts:{ready:Promise.resolve()},body:{createEl:()=>canvas}});
+ assert.ok(fills.includes(palette.exports.taskColors.blue.background));assert.ok(fills.includes('#f3f4f6'));
 });

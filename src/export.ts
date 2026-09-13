@@ -1,5 +1,6 @@
 import { t } from "./i18n";
 import type { Activity, Task, StoryMapData } from "./types";
+import { isTaskColor, taskColors } from "./task-colors";
 
 export type ExportFormat = "xmind" | "png" | "pdf" | "json";
 const colors = { lavender: "#eee5ff", yellow: "#fff0bd", blue: "#dfebff", green: "#e5f2d7" };
@@ -69,7 +70,8 @@ export async function renderMap(data: StoryMapData, doc: Document): Promise<HTML
   text(t("任务 Task"), margin + 8, y + 12, gutter - 20);
   columns.forEach((c, index) => {
     const x = margin + gutter + index * colWidth;
-    box(x + 4, y, colWidth - 8, taskHeight - 8, "#f3f4f6");
+    const taskColor = c.task?.color;
+    box(x + 4, y, colWidth - 8, taskHeight - 8, isTaskColor(taskColor) ? taskColors[taskColor].background : "#f3f4f6");
     text(c.task?.title || "", x + 12, y + 12, colWidth - 24);
   });
   y += taskHeight;

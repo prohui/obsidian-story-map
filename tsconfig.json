@@ -1,8 +1,15 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": { "*": ["node_modules/*"] },
-    "types": ["node", "obsidian"],
+    "paths": {
+      "*": [
+        "node_modules/*"
+      ]
+    },
+    "types": [
+      "node",
+      "obsidian"
+    ],
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
@@ -19,7 +26,16 @@
     "skipLibCheck": true,
     "downlevelIteration": true,
     "esModuleInterop": true,
-    "lib": ["dom", "es5", "scripthost", "es2015"]
+    "lib": [
+      "dom",
+      "es5",
+      "scripthost",
+      "es2015"
+    ],
+    "jsx": "react-jsx"
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ]
 }

@@ -1,0 +1,15 @@
+import { createRoot } from 'react-dom/client';
+import { DetailEditorApp } from '../../src/detail-editor-app';
+import { setLocale } from '../../src/i18n';
+import { createFixtureApp, TFile } from './obsidian-stub';
+setLocale('zh');
+Object.assign(window, { createEl: (tag: string) => document.createElement(tag) });
+Object.assign(document, { win: window });
+const { app, files } = createFixtureApp();
+files.set('参考/页面原型.svg', new TFile('参考/页面原型.svg'));
+files.set('依赖/接口定义.pdf', new TFile('依赖/接口定义.pdf'));
+const task = { id: 'test', activityId: 'activity', title: '球员球队身份管理', color: 'blue' as const, description: '## 目标\n\n管理球员的**当前身份**与历史归属，明确参考资料和交付依赖。\n\n- 查看所属球队及有效期\n- 支持主位置和兼项位置\n\n- [ ] 核对接口字段\n- [x] 确认页面原型\n\n![[参考/页面原型.svg]]', attachments: [{ path: '参考/页面原型.svg', kind: 'reference' as const }, { path: '依赖/接口定义.pdf', kind: 'dependency' as const }] };
+const root = createRoot(document.getElementById('root')!);
+const params = new URLSearchParams(location.search);
+if (params.has('light')) document.body.className = 'theme-light';
+root.render(<DetailEditorApp app={app as never} sourcePath="Map.storymap" entity={task} kind={params.has('activity') ? 'activity' : 'task'} creating={false} context="总览与选材" onBusy={() => {}} onClose={() => {if (!document.getElementById('result')!.textContent) document.getElementById('result')!.textContent='已关闭';}} onSave={async draft => {document.getElementById('result')!.textContent='已保存：'+JSON.stringify(draft);return true;}} />);

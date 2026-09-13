@@ -280,3 +280,25 @@ test('English and automatic language exports translate labels, never story conte
   assert.equal(sheets[0].rootTopic.children.attached[0].title, 'User journey');
   assert.equal(JSON.stringify(plugin.data), original);
 });
+
+test('task descriptions and attachment roles persist, roll back on failure, and undo together', async()=>{
+  let fail=false; let stored;
+  const {plugin}=createPlugin({write:async(_path,raw)=>{if(fail)throw Error('disk full');stored=JSON.parse(raw);}});
+  const task=plugin.data.tasks[0];
+  const original=JSON.stringify(task);
+  const change=()=>{task.description='## Reference\n**Required**\n![[Assets/mock.png]]';task.attachments=[{path:'Assets/mock.png',kind:'reference'},{path:'Specs/api.pdf',kind:'dependency'}];};
+  fail=true;assert.equal(await plugin.commitModal(change),false);assert.equal(JSON.stringify(task),original);
+  fail=false;assert.equal(await plugin.commitModal(change),true);
+  const saved=stored.tasks.find(item=>item.id===task.id);
+  assert.equal(saved.description,task.description);assert.equal(saved.attachments[1].kind,'dependency');
+  plugin.undo();assert.equal(JSON.stringify(plugin.data.tasks.find(item=>item.id===task.id)),original);
+});
+
+test('Activity descriptions and dependency attachments participate in save rollback and undo',async()=>{
+ let fail=true;let stored;const {plugin}=createPlugin({write:async(_path,raw)=>{if(fail)throw Error('disk full');stored=JSON.parse(raw);}});
+ const activity=plugin.data.activities[0],original=JSON.stringify(activity);
+ const change=()=>{activity.description='## Outcome\n\n**Approved**\n\n![[Assets/reference.png]]';activity.attachments=[{path:'Specs/brief.pdf',kind:'dependency'}];};
+ assert.equal(await plugin.commitModal(change),false);assert.equal(JSON.stringify(activity),original);
+ fail=false;assert.equal(await plugin.commitModal(change),true);assert.equal(stored.activities[0].attachments[0].kind,'dependency');
+ plugin.undo();assert.equal(JSON.stringify(plugin.data.activities[0]),original);
+});

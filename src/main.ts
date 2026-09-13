@@ -5,10 +5,14 @@ import { createSampleMap } from "./sample";
 import { renderMap, canvasBytes, imagePdf, type ExportFormat } from "./export";
 import { pickerWindow, pickExportFile, writeExportFile, exportFilename } from "./save-file";
 import type { Activity, Release, Story, StoryMapData, Task } from "./types";
+import { autoSizeDescription } from "./auto-size";
+import { ActivityEditorModal, TaskEditorModal, taskT } from "./task-editor";
+import { renameTaskFiles } from "./task-content";
+import { isTaskColor } from "./task-colors";
 
 const VIEW_TYPE = "story-map-view";
 const DATA_PATH = ".story-map.json";
-const PLUGIN_VERSION = "1.4.1";
+const PLUGIN_VERSION = "1.5.0";
 const STATUS_LABELS: Record<Story["status"], string> = { idea: "想法", planned: "已规划", doing: "进行中", done: "已完成" };
 const PRIORITY_LABELS: Record<Story["priority"], string> = { low: "低", medium: "中", high: "高" };
 
@@ -302,6 +306,7 @@ class CreateItemModal extends SavingModal {
 }
 
 class StoryEditorModal extends SavingModal {
+  private disposeDescription?: () => void;
   constructor(private plugin: StoryMapPlugin, private story: Story, private saveStory?: (story: Story) => void) { super(plugin.app); }
   onOpen(): void {
     this.trackEditor(this.plugin);
@@ -318,6 +323,7 @@ class StoryEditorModal extends SavingModal {
       row.addClass(`story-map-edit-${key}`);
       const control = type === "textarea" ? row.createEl("textarea") : row.createEl("input", { type });
       control.value = String(this.story[key] ?? ""); controls[key] = control;
+      if (type === "textarea") this.disposeDescription = autoSizeDescription(control as HTMLTextAreaElement);
     });
     let notePath = this.story.notePath;
     const noteRow = contentEl.createDiv("story-map-form-row"); noteRow.createEl("label", { text: t("关联笔记") });
@@ -340,6 +346,18 @@ class StoryEditorModal extends SavingModal {
     metadata.append(roleRow, statusRow, priorityRow);
     if (estimateRow) metadata.append(estimateRow);
     contentEl.append(noteRow, tagsRow);
+    const form = contentEl.createDiv("story-map-story-form");
+    Array.from(contentEl.children).forEach(child => {
+      if (child !== form && child.tagName !== "H2") form.append(child);
+    });
+    form.querySelectorAll<HTMLElement>(".story-map-form-row").forEach(row => {
+      const label = row.querySelector("label");
+      const control = row.querySelector("input,textarea,select");
+      if (label && control) {
+        control.id = uid("story-field");
+        label.htmlFor = control.id;
+      }
+    });
     const actions = contentEl.createDiv("story-map-modal-actions");
     const cancel = actions.createEl("button", { text: t("取消") }); cancel.onclick = () => this.close();
     const save = actions.createEl("button", { text: t("保存"), cls: "mod-cta" });
@@ -361,7 +379,7 @@ class StoryEditorModal extends SavingModal {
     };
     window.setTimeout(() => (controls.title as HTMLInputElement | undefined)?.select(), 0);
   }
-  onClose(): void { super.onClose(); this.contentEl.empty(); }
+  onClose(): void { this.disposeDescription?.(); super.onClose(); this.contentEl.empty(); }
 }
 
 class StoryMapView extends FileView {
@@ -370,6 +388,7 @@ class StoryMapView extends FileView {
   private roleFilter = "";
   private inspectorOpen = false;
   private selectTimer: number | undefined;
+  private disposeDescription?: () => void;
   constructor(leaf: WorkspaceLeaf, private plugin: StoryMapPlugin) { super(leaf); this.allowNoFile = true; }
   owns(plugin: StoryMapPlugin): boolean { return this.plugin === plugin; }
   async onLoadFile(file: TFile): Promise<void> {
@@ -384,9 +403,11 @@ class StoryMapView extends FileView {
   getIcon(): string { return "map"; }
   resetMapState(): void { window.clearTimeout(this.selectTimer); this.selectedId = null; this.query = ""; this.roleFilter = ""; this.inspectorOpen = false; }
   async onOpen(): Promise<void> { this.render(); }
-  async onClose(): Promise<void> { window.clearTimeout(this.selectTimer); }
+  async onClose(): Promise<void> { window.clearTimeout(this.selectTimer); this.disposeDescription?.(); }
 
   render(): void {
+    this.disposeDescription?.();
+    this.disposeDescription = undefined;
     const root = this.containerEl.children[1] as HTMLElement;
     const previousViewport = root.querySelector<HTMLElement>(".story-map-viewport");
     const scrollLeft = previousViewport?.scrollLeft || 0;
@@ -456,18 +477,22 @@ class StoryMapView extends FileView {
     const slotActivities: Activity[] = [];
     const slots = activities.flatMap(activity => {
       const children = tasks.filter(task => task.activityId === activity.id);
-      slotActivities.push(...Array<Activity>(Math.max(1, children.length)).fill(activity));
-      return children.length ? children : [undefined];
+      slotActivities.push(...Array<Activity>(children.length + 1).fill(activity));
+      return [...children, undefined];
     });
+    // Each activity ends with a dedicated action track, separate from story columns.
+    canvas.setCssProps({ "--story-map-columns": slots.map(task =>
+      task ? "var(--task-width)" : "112px"
+    ).join(" ") || "none" });
     const activityRow = canvas.createDiv("story-map-activity-row");
     activityRow.createDiv({ text: t("活动 Activity"), cls: "story-map-axis-label" });
     activities.forEach(activity => {
       const activityTasks = tasks.filter(t => t.activityId === activity.id);
       const box = activityRow.createDiv("story-map-activity"); box.id = `activity-${activity.id}`;
       box.setAttribute("data-label", t("活动 Activity"));
-      box.style.gridColumn = `span ${Math.max(1, activityTasks.length)}`;
-      const name = box.createSpan({ text: activity.title, cls: "story-map-activity-name" });
-      name.onclick = event => { event.stopPropagation(); this.renameActivity(activity); };
+      box.style.gridColumn = `span ${activityTasks.length + 1}`;
+      const name = box.createEl("button", { text: activity.title, cls: "story-map-activity-name", attr: { "aria-label": `${taskT("活动详情")}: ${activity.title}` } });
+      name.onclick = event => { event.stopPropagation(); new ActivityEditorModal(this.plugin, activity).open(); };
       box.oncontextmenu = e => this.activityMenu(e, activity);
     });
     const addActivity = activityRow.createEl("button", { text: `+ ${t("活动 Activity")}`, cls: "story-map-add-activity" }); addActivity.onclick = () => this.addActivity();
@@ -478,20 +503,20 @@ class StoryMapView extends FileView {
       box.dataset.activityId = slotActivities[index]?.id || "";
       if (!task) {
         const activity = slotActivities[index];
-        box.addClass("is-activity-start", "is-activity-end");
-        box.createEl("button", { text: `+ ${t("任务 Task")}` }).onclick = () => { if (activity) this.addTask(activity); };
+        const previousTask = slots[index - 1];
+        box.addClass("story-map-task-action", "is-activity-end");
+        if (!previousTask) box.addClass("is-activity-start");
+        const add = box.createEl("button", { text: `+ ${t("任务 Task")}`, cls: "story-map-add-task-after", attr: { "aria-label": t("在{0}右侧添加 Task", previousTask?.title || activity?.title || ""), title: t("追加 Task") } });
+        add.onclick = event => { event.stopPropagation(); if (activity) this.addTask(activity, previousTask); };
         return;
       }
       box.dataset.taskId = task.id;
-      const taskName = box.createSpan({ text: task.title, cls: "story-map-task-name" }); taskName.onclick = event => { event.stopPropagation(); this.renameTask(task); };
+      if (isTaskColor(task.color)) box.addClass("story-map-task-colored", `story-map-task-tone-${task.color}`);
+      const taskName = box.createEl("button", { text: task.title, cls: "story-map-task-name", attr: { "aria-label": `${taskT("任务详情")}: ${task.title}` } });
+      taskName.onclick = event => { event.stopPropagation(); new TaskEditorModal(this.plugin, task).open(); };
+      if (task.description || task.attachments?.length) taskName.createSpan({ text: ` ▤${task.attachments?.length ? ` · ${task.attachments.length}` : ""}`, cls: "story-map-task-content-mark" });
       const siblings = tasks.filter(item => item.activityId === task.activityId);
       if (siblings[0]?.id === task.id) box.addClass("is-activity-start");
-      const isLastTask = siblings[siblings.length - 1]?.id === task.id;
-      if (isLastTask) {
-        box.addClass("is-activity-end");
-        const add = box.createEl("button", { text: `+ ${t("任务 Task")}`, cls: "story-map-add-task-after", attr: { "aria-label": t("在{0}右侧添加 Task", task.title), title: t("追加 Task") } });
-        add.onclick = event => { event.stopPropagation(); const activity = activities.find(item => item.id === task.activityId); if (activity) this.addTask(activity, task); };
-      }
       box.oncontextmenu = e => this.taskMenu(e, task);
     });
     releases.forEach(release => this.renderRelease(canvas, release, slots, stories));
@@ -524,11 +549,10 @@ class StoryMapView extends FileView {
     const columns = row.createDiv("story-map-release-columns");
     tasks.forEach(task => {
       const col = columns.createDiv("story-map-story-column");
-      if (!task) { col.addClass("is-activity-start", "is-activity-end"); return; }
+      if (!task) { col.addClass("story-map-action-spacer", "is-activity-end"); col.setAttribute("aria-hidden", "true"); return; }
       col.dataset.taskId = task.id; col.dataset.releaseId = release.id;
       const siblings = tasks.filter((item): item is Task => !!item && item.activityId === task.activityId);
       if (siblings[0]?.id === task.id) col.addClass("is-activity-start");
-      if (siblings[siblings.length - 1]?.id === task.id) col.addClass("is-activity-end");
       col.ondragover = e => { e.preventDefault(); col.addClass("is-drop-target"); };
       col.ondragleave = () => col.removeClass("is-drop-target");
       col.ondrop = e => {
@@ -570,33 +594,39 @@ class StoryMapView extends FileView {
         this.renderInspector(body);
       }, 300);
     };
-    card.ondblclick = () => { window.clearTimeout(this.selectTimer); new StoryEditorModal(this.plugin, story).open(); };
+    card.ondblclick = () => { card.click(); };
     card.oncontextmenu = e => this.storyMenu(e, story);
   }
 
   private renderInspector(parent: HTMLElement): void {
+    this.disposeDescription?.();
+    this.disposeDescription = undefined;
     const panel = parent.createEl("aside", { cls: "story-map-inspector" });
     const story = this.plugin.data.stories.find(s => s.id === this.selectedId);
     const heading = panel.createDiv("story-map-panel-heading"); heading.createEl("strong", { text: t("故事详情") });
     this.iconButton(heading, "x", t("关闭详情"), () => { this.inspectorOpen = false; this.render(); });
     if (!story) { panel.createDiv({ text: t("选择一张故事卡查看详情"), cls: "story-map-empty" }); return; }
-    const title = panel.createEl("input", { value: story.title, cls: "story-map-inspector-title", attr: { "aria-label": t("故事标题") } }); title.onchange = () => { story.title = title.value.trim() || t("未命名故事"); void this.plugin.commit(); };
+    const title = panel.createEl("input", { value: story.title, cls: "story-map-inspector-title", attr: { "aria-label": t("故事标题"), title: story.title } }); title.onchange = () => { story.title = title.value.trim() || t("未命名故事"); void this.plugin.commit(); };
     this.selectField(panel, t("状态"), story.status, [["idea", t("想法")], ["planned", t("已规划")], ["doing", t("进行中")], ["done", t("已完成")]], v => { story.status = v as Story["status"]; });
-    this.selectField(panel, t("优先级"), story.priority, [["low", t("低")], ["medium", t("中")], ["high", t("高")]], v => { story.priority = v as Story["priority"]; });
     const roleField = this.field(panel, t("角色")); const roleChoices = roleField.createDiv("story-map-role-choices");
     const roleSelect = roleChoices.createEl("select", { attr: { "aria-label": t("Story 所属角色") } }); roleSelect.createEl("option", { value: "", text: t("未分配") });
     this.plugin.data.roles.forEach(role => roleSelect.createEl("option", { value: role.id, text: role.name })); roleSelect.value = story.roleId || "";
     roleSelect.onchange = () => { story.roleId = roleSelect.value || undefined; void this.plugin.commit(); };
-    const manageRoles = roleChoices.createEl("button", { text: this.plugin.data.roles.length ? t("管理角色") : t("+ 添加角色"), cls: "story-map-manage-roles", attr: { "aria-label": t("添加、编辑或删除角色") } });
-    manageRoles.onclick = () => new RoleManagerModal(this.plugin).open();
-    const estimate = this.field(panel, t("估点")).createEl("input", { type: "number", value: String(story.estimate), attr: { min: "0" } });
+    const descriptionRow = this.field(panel, t("描述"));
+    descriptionRow.addClass("story-map-description-field");
+    const desc = descriptionRow.createEl("textarea", { attr: { "aria-label": t("故事描述") } });
+    desc.value = story.description;
+    this.disposeDescription = autoSizeDescription(desc);
+    desc.onchange = () => { story.description = desc.value; void this.plugin.commit(); };
+    const more = panel.createEl("details", { cls: "story-map-more-properties" });
+    more.createEl("summary", { text: taskT("更多属性") });
+    this.selectField(more, t("优先级"), story.priority, [["low", t("低")], ["medium", t("中")], ["high", t("高")]], v => { story.priority = v as Story["priority"]; });
+    const estimate = this.field(more, t("估点")).createEl("input", { type: "number", value: String(story.estimate), attr: { min: "0" } });
     estimate.onchange = () => { story.estimate = Math.max(0, Number(estimate.value) || 0); void this.plugin.commit(); };
-    const tags = this.field(panel, t("标签")).createEl("input", { value: story.tags.join(", ") }); tags.onchange = () => { story.tags = tags.value.split(/[,，]/).map(x => x.trim()).filter(Boolean); void this.plugin.commit(); };
-    const desc = this.field(panel, t("描述")).createEl("textarea"); desc.value = story.description; desc.onchange = () => { story.description = desc.value; void this.plugin.commit(); };
-    noteSelector(this.field(panel, t("关联笔记")), this.plugin, story.notePath, path => { story.notePath = path; void this.plugin.commit(); });
-    const actions = panel.createDiv("story-map-inspector-actions");
-    if (!story.notePath) actions.createEl("button", { text: t("创建笔记") }).onclick = () => void this.plugin.openStoryNote(story);
-    const edit = actions.createEl("button", { text: t("编辑全部") }); edit.onclick = () => new StoryEditorModal(this.plugin, story).open();
+    const tags = this.field(more, t("标签")).createEl("input", { value: story.tags.join(", ") }); tags.onchange = () => { story.tags = tags.value.split(/[,，]/).map(x => x.trim()).filter(Boolean); void this.plugin.commit(); };
+    noteSelector(this.field(more, t("关联笔记")), this.plugin, story.notePath, path => { story.notePath = path; void this.plugin.commit(); });
+    if (!story.notePath) more.createEl("button", { text: t("创建笔记") }).onclick = () => void this.plugin.openStoryNote(story);
+
   }
 
   private field(parent: HTMLElement, label: string): HTMLElement { const row = parent.createDiv("story-map-field"); row.createEl("label", { text: label }); return row; }
@@ -615,15 +645,16 @@ class StoryMapView extends FileView {
     }).open();
   }
   private addActivity(): void {
-    new CreateItemModal(this.plugin, t("添加 Activity"), title => { this.plugin.data.activities.push({ id: uid("activity"), title }); }).open();
+    new ActivityEditorModal(this.plugin, { id: uid("activity"), title: "", description: "", attachments: [] }, activity => { this.plugin.data.activities.push(activity); }).open();
   }
   private addTask(activity: Activity, afterTask?: Task): void {
-    new CreateItemModal(this.plugin, t("添加 Task"), value => {
+    const draft: Task = { id: uid("task"), title: "", activityId: activity.id, description: "", attachments: [] };
+    new TaskEditorModal(this.plugin, draft, task => {
       const tasks = this.plugin.data.tasks;
       let insertAt = afterTask ? tasks.findIndex(task => task.id === afterTask.id) + 1 : -1;
       if (!afterTask) tasks.forEach((task, index) => { if (task.activityId === activity.id) insertAt = index + 1; });
-      tasks.splice(insertAt < 0 ? tasks.length : insertAt, 0, { id: uid("task"), title: value, activityId: activity.id });
-    }, activity.title).open();
+      tasks.splice(insertAt < 0 ? tasks.length : insertAt, 0, task);
+    }).open();
   }
   private renameActivity(activity: Activity): void {
     const element = Array.from(this.contentEl.querySelectorAll<HTMLElement>(".story-map-activity")).find(item => item.id === `activity-${activity.id}`)?.querySelector<HTMLElement>(".story-map-activity-name");
@@ -672,6 +703,7 @@ class StoryMapView extends FileView {
   private storyMenu(event: MouseEvent, story: Story): void { event.preventDefault(); const menu = new Menu().setUseNativeMenu(false); menu.addItem(i => i.setTitle(t("编辑")).setIcon("pencil").onClick(() => new StoryEditorModal(this.plugin, story).open())); menu.addItem(i => i.setTitle(t("打开关联笔记")).setIcon("file-text").onClick(() => void this.plugin.openStoryNote(story))); menu.addSeparator(); menu.addItem(i => i.setTitle(t("删除")).setIcon("trash").onClick(() => { this.plugin.data.stories.remove(story); this.selectedId = null; void this.plugin.commit(); })); menu.showAtMouseEvent(event); }
   private activityMenu(event: MouseEvent, activity: Activity): void {
     event.preventDefault(); const menu = new Menu().setUseNativeMenu(false);
+    menu.addItem(i => i.setTitle(taskT("活动详情")).setIcon("file-text").onClick(() => new ActivityEditorModal(this.plugin, activity).open()));
     menu.addItem(i => i.setTitle(t("添加 Task")).setIcon("plus").onClick(() => this.addTask(activity)));
     menu.addItem(i => i.setTitle(t("修改名称")).setIcon("pencil").onClick(() => this.renameActivity(activity)));
     const taskCount = this.plugin.data.tasks.filter(task => task.activityId === activity.id).length;
@@ -684,6 +716,7 @@ class StoryMapView extends FileView {
   }
   private taskMenu(event: MouseEvent, task: Task): void {
     event.preventDefault(); const activity = this.plugin.data.activities.find(item => item.id === task.activityId); const menu = new Menu().setUseNativeMenu(false);
+    menu.addItem(i => i.setTitle(taskT("任务详情")).setIcon("file-text").onClick(() => new TaskEditorModal(this.plugin, task).open()));
     if (activity) menu.addItem(i => i.setTitle(t("在右侧添加 Task")).setIcon("plus").onClick(() => this.addTask(activity, task)));
     menu.addItem(i => i.setTitle(t("修改名称")).setIcon("pencil").onClick(() => this.renameTask(task)));
     const storyCount = this.plugin.data.stories.filter(story => story.taskId === task.id).length;
@@ -733,6 +766,7 @@ export default class StoryMapPlugin extends Plugin {
       for (const story of data.stories) if (story.notePath === oldPath || story.notePath?.startsWith(oldPath + "/")) {
         story.notePath = newPath + story.notePath.slice(oldPath.length); changed = true;
       }
+      for (const item of [...data.tasks, ...data.activities]) if (renameTaskFiles(item, oldPath, newPath)) changed = true;
       return changed;
     };
     if (update(this.data)) await this.commit(false);
@@ -822,7 +856,7 @@ export default class StoryMapPlugin extends Plugin {
       }
     }));
     this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
-      if (file instanceof TFolder || (file instanceof TFile && file.extension === "md")) {
+      if (file instanceof TFolder || file instanceof TFile) {
         this.noteRenameQueue = this.noteRenameQueue.then(() => this.updateNotePaths(oldPath, file.path)).catch(() => { new Notice(t("关联笔记更新失败")); });
       }
     }));
@@ -1018,8 +1052,9 @@ export default class StoryMapPlugin extends Plugin {
     };
     const activityTopics = this.data.activities.map(activity => topic(activity.title,
       this.data.tasks.filter(taskItem => taskItem.activityId === activity.id).map(taskItem => topic(taskItem.title,
-        this.data.stories.filter(story => story.taskId === taskItem.id).map(story => storyTopic(story))
-      ))
+        this.data.stories.filter(story => story.taskId === taskItem.id).map(story => storyTopic(story)),
+        [taskItem.description || "", ...(taskItem.attachments || []).map(item => `${taskT(item.kind === "dependency" ? "依赖文件" : "参考资料")}: ${item.path}`)].filter(Boolean).join("\n")
+      )), [activity.description || "", ...(activity.attachments || []).map(item => `${taskT(item.kind === "dependency" ? "依赖文件" : "参考资料")}: ${item.path}`)].filter(Boolean).join("\n")
     ));
     const releaseTopics = this.data.releases.map(release => topic(release.title,
       this.data.stories.filter(story => story.releaseId === release.id).map(story => storyTopic(story, true)), release.subtitle));

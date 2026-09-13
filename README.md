@@ -4,7 +4,11 @@ English · [简体中文](README.zh-CN.md)
 
 Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
 
-**[Download 1.4.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.4.1)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.5.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.5.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+
+### 1.5.0
+
+Compact Story details with growing descriptions and collapsed secondary properties. Task and Activity descriptions support basic rich text and vault images in a narrow panel, with formatting controls shown while editing. Attachments use thumbnails and filename chips. Tasks support custom colors and a separate add-task column.
 
 ### 1.4.1
 

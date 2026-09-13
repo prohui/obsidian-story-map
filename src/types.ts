@@ -1,5 +1,6 @@
 export type StoryStatus = "idea" | "planned" | "doing" | "done";
 export type StoryColor = "lavender" | "blue" | "yellow" | "green";
+export type TaskColor = StoryColor | "pink" | "orange";
 
 export interface Story {
   id: string;
@@ -17,8 +18,9 @@ export interface Story {
   roleId?: string;
 }
 
-export interface Task { id: string; title: string; activityId: string; }
-export interface Activity { id: string; title: string; }
+export interface TaskAttachment { path: string; kind: "reference" | "dependency"; }
+export interface Task { id: string; title: string; activityId: string; description?: string; attachments?: TaskAttachment[]; color?: TaskColor; }
+export interface Activity { id: string; title: string; description?: string; attachments?: TaskAttachment[]; }
 export interface Release { id: string; title: string; subtitle: string; }
 export interface Role { id: string; name: string; description: string; }
 
