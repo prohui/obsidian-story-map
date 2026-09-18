@@ -1,6 +1,6 @@
 # Obsidian Story Map
 
-English · [简体中文](README.zh-CN.md)
+English · [Chinese](README.zh-CN.md)
 
 Plan user journeys, break work into stories, and organize releases inside Obsidian. Keep maps alongside your project notes, attach reference files, and export your plan as PNG, PDF, XMind, or JSON.
 
@@ -25,13 +25,13 @@ Right-click a folder in Obsidian's file explorer and choose **New story map**. E
 
 **1. Right-click the destination folder → New story map.** You can create a map in any vault folder.
 
-![Obsidian folder context menu with New story map highlighted](docs/images/create-map-context-zh.png)
+![Obsidian folder context menu with the New story map command](docs/images/create-map-context-en.png)
 
-**2. Enter a map name, choose a starter template or sample, and click Create.** The map is saved inside the selected folder—for example, `Projects/Website/网站用户旅程.storymap`.
+**2. Enter a map name, choose a starter template or sample, and click Create.** The map is saved inside the selected folder—for example, `Projects/Website/Website journey.storymap`.
 
-![New story map dialog with a map name, template selector, and Create button](docs/images/create-map-dialog-zh.png)
+![New story map dialog with a map name, template selector, and Create button](docs/images/create-map-dialog-en.png)
 
-*These two screenshots use the Chinese Obsidian interface: 新建故事地图 = New story map, 轻量模板 = Starter template, 创建 = Create. The creation dialog uses a demo project folder.*
+*Captured in an English-language demo vault.*
 
 Name the map, add activities for journey stages, break each activity into tasks, and add stories within milestone lanes. Click a Story for its details; click a Task or Activity title to open its editor. Manage roles and milestones from the toolbar. Milestones containing stories cannot be deleted; empty tasks and activities can be deleted from their context menus.
 
