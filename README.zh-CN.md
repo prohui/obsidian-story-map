@@ -113,3 +113,7 @@ npm test
 ## 许可证
 
 [MIT](LICENSE) © 2026 Dahui。本项目与 Obsidian、Miro、XMind 无隶属关系。
+
+## 支持开发
+
+如果 Story Map 对你有帮助，欢迎[在 Ko-fi 上支持开发](https://ko-fi.com/hexhe)，帮助我持续维护、修复问题和改进体验。赞助完全自愿，不影响任何功能的使用。

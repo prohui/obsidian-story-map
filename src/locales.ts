@@ -1,7 +1,10 @@
 import { editorDictionaries } from "./editor-locales";
 
 // Columns: source key, Traditional Chinese, Japanese, Korean, German, French, Spanish.
-const rows = `文件冲突|檔案衝突|ファイルの競合|파일 충돌|Dateikonflikt|Conflit de fichier|Conflicto de archivo
+const rows = `支持开发|支持開發|開発を支援|개발 지원|Entwicklung unterstützen|Soutenir le développement|Apoyar el desarrollo
+在 Ko-fi 上支持开发|在 Ko-fi 上支持開發|Ko-fi で支援|Ko-fi에서 후원|Auf Ko-fi unterstützen|Soutenir sur Ko-fi|Apoyar en Ko-fi
+赞助完全自愿，不影响任何功能的使用。|贊助完全自願，不影響任何功能的使用。|支援は任意です。機能の利用に影響はありません。|후원은 선택 사항이며 기능 사용에 영향을 주지 않습니다.|Die Unterstützung ist freiwillig und hat keinen Einfluss auf die verfügbaren Funktionen.|Le soutien est facultatif et ne modifie pas les fonctionnalités disponibles.|El apoyo es voluntario y no afecta a las funciones disponibles.
+文件冲突|檔案衝突|ファイルの競合|파일 충돌|Dateikonflikt|Conflit de fichier|Conflicto de archivo
 备份并重新加载|備份並重新載入|バックアップして再読み込み|백업 후 다시 불러오기|Sichern und neu laden|Sauvegarder et recharger|Respaldar y recargar
 保留双方版本：先将当前地图另存为副本，再加载磁盘版本。|保留雙方版本：先將目前地圖另存副本，再載入磁碟版本。|現在のマップをコピーとして保存してからディスク版を読み込み、両方を保持します。|현재 지도를 복사본으로 저장한 후 디스크 버전을 불러와 두 버전을 유지합니다.|Beide Versionen behalten: aktuelle Map kopieren, dann Datenträgerversion laden.|Conserver les deux versions : copier la carte actuelle, puis charger la version sur disque.|Conserva ambas versiones: copia el mapa actual y carga la versión del disco.
 关联笔记更新失败|關聯筆記更新失敗|リンクの更新に失敗しました|연결된 노트 업데이트 실패|Notizverknüpfungen konnten nicht aktualisiert werden|Échec de mise à jour des liens|No se pudieron actualizar los enlaces

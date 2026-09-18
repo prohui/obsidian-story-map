@@ -110,6 +110,10 @@ Interface translations are in `src/i18n.ts` and `src/locales.ts`; editor transla
 
 Contributions and translations are welcome. When reporting an issue, include your Obsidian version, reproduction steps, and an example without private data.
 
+## Support development
+
+If Story Map helps you plan your projects, you can [buy me a coffee](https://ko-fi.com/hexhe) to support maintenance, bug fixes, and improvements. Support is entirely optional and does not unlock or restrict any features.
+
 ## License
 
 [MIT](LICENSE) © 2026 Dahui. Not affiliated with Obsidian, Miro, or XMind.

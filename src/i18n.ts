@@ -18,6 +18,7 @@ export function setLocale(language: Language, hostLanguage = "en"): void {
 }
 
 export const english: Record<string, string> = {
+  "支持开发": "Support development", "赞助完全自愿，不影响任何功能的使用。": "Support is entirely optional and does not unlock or restrict any features.", "在 Ko-fi 上支持开发": "Support on Ko-fi",
   "文件冲突": "File conflict", "备份并重新加载": "Back up and reload", "保留双方版本：先将当前地图另存为副本，再加载磁盘版本。": "Keep both versions: save a copy of the current map, then load the disk version.", "关联笔记更新失败": "Could not update linked notes",
   "地图已被外部修改，已停止保存；请先备份当前修改": "Map changed externally. Saving stopped; back up your current edits first.",
   "关联笔记不存在，请重新关联": "Linked note is missing. Please link another note.",

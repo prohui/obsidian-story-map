@@ -1,4 +1,4 @@
-import { FileView, FuzzySuggestModal, Menu, Modal, Notice, Plugin, TFile, TFolder, WorkspaceLeaf, normalizePath, setIcon, getLanguage } from "obsidian";
+import { FileView, FuzzySuggestModal, Menu, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, WorkspaceLeaf, normalizePath, setIcon, getLanguage } from "obsidian";
 import { t, setLocale, isLanguage, languageNames, type Language } from "./i18n";
 import { strToU8, zipSync } from "fflate";
 import { createSampleMap } from "./sample";
@@ -966,6 +966,7 @@ export default class StoryMapPlugin extends Plugin {
     const language = settings && typeof settings === "object" && "language" in settings ? settings.language : undefined;
     this.language = isLanguage(language) ? language : "auto";
     setLocale(this.language, this.hostLanguage());
+    this.addSettingTab(new StoryMapSettingsTab(this.app, this));
     await this.loadMap();
     this.registerView(VIEW_TYPE, leaf => new StoryMapView(leaf, this));
     this.registerExtensions(["storymap"], VIEW_TYPE);
@@ -1207,5 +1208,21 @@ export default class StoryMapPlugin extends Plugin {
       await this.commit(false);
     }
     if (file instanceof TFile) await this.app.workspace.getLeaf("tab").openFile(file);
+  }
+}
+
+class StoryMapSettingsTab extends PluginSettingTab {
+  // This tab contains only an external support link, not configurable settings.
+  getSettingDefinitions(): [] { return []; }
+  display(): void {
+    this.containerEl.empty();
+    const support = new Setting(this.containerEl)
+      .setName(t("支持开发"))
+      .setDesc(t("赞助完全自愿，不影响任何功能的使用。"));
+    support.controlEl.createEl("a", {
+      text: t("在 Ko-fi 上支持开发"),
+      href: "https://ko-fi.com/hexhe",
+      attr: { target: "_blank", rel: "noopener noreferrer" }
+    });
   }
 }

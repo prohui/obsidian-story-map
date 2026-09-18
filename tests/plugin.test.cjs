@@ -10,7 +10,7 @@ function createPlugin(adapter = {}) {
     module: { exports: {} }, exports: {}, console, setTimeout, clearTimeout,
     setImmediate, Uint8Array, ArrayBuffer, TextEncoder,
     require: id => id === 'obsidian' ? {
-      Plugin: class { constructor(app, manifest) { this.app=app; this.manifest=manifest; } async saveData() {} registerExtensions() {} registerEvent() {} }, FileView: class {}, Modal: class {}, FuzzySuggestModal: class {},
+      PluginSettingTab: class {}, Plugin: class { constructor(app, manifest) { this.app=app; this.manifest=manifest; } async saveData() {} addSettingTab() {} registerExtensions() {} registerEvent() {} }, FileView: class {}, Modal: class {}, FuzzySuggestModal: class {},
       getLanguage: () => 'en',
       Notice: class { constructor(message) { notices.push(message); } },
       normalizePath: path => path,
