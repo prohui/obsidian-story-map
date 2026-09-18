@@ -116,4 +116,10 @@ npm test
 
 ## 支持开发
 
-如果 Story Map 对你有帮助，欢迎[在 Ko-fi 上支持开发](https://ko-fi.com/hexhe)，帮助我持续维护、修复问题和改进体验。赞助完全自愿，不影响任何功能的使用。
+如果 Story Map 对你有帮助，欢迎通过微信赞赏支持持续维护、问题修复和体验改进。赞赏完全自愿，不影响任何功能的使用。
+
+使用微信扫描下方赞赏码，或保存图片后在微信扫一扫中从相册识别。
+
+<img src="docs/images/wechat-support.jpg" alt="何大辉的微信赞赏码" width="320" />
+
+海外用户也可以[通过 Ko-fi 支持开发](https://ko-fi.com/hexhe)。

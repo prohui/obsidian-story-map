@@ -1,5 +1,5 @@
 import { FileView, FuzzySuggestModal, Menu, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile, TFolder, WorkspaceLeaf, normalizePath, setIcon, getLanguage } from "obsidian";
-import { t, setLocale, isLanguage, languageNames, type Language } from "./i18n";
+import { t, setLocale, getLocale, isLanguage, languageNames, type Language } from "./i18n";
 import { strToU8, zipSync } from "fflate";
 import { createSampleMap } from "./sample";
 import { renderMap, canvasBytes, imagePdf, type ExportFormat } from "./export";
@@ -1219,9 +1219,10 @@ class StoryMapSettingsTab extends PluginSettingTab {
     const support = new Setting(this.containerEl)
       .setName(t("支持开发"))
       .setDesc(t("赞助完全自愿，不影响任何功能的使用。"));
+    const chinese = getLocale() === "zh" || getLocale() === "zh-TW";
     support.controlEl.createEl("a", {
-      text: t("在 Ko-fi 上支持开发"),
-      href: "https://ko-fi.com/hexhe",
+      text: chinese ? (getLocale() === "zh-TW" ? "微信贊賞" : "微信赞赏") : t("在 Ko-fi 上支持开发"),
+      href: chinese ? "https://github.com/prohui/obsidian-story-map/blob/main/docs/support.zh-CN.md" : "https://ko-fi.com/hexhe",
       attr: { target: "_blank", rel: "noopener noreferrer" }
     });
   }
