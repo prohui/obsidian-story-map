@@ -2,63 +2,88 @@
 
 English · [简体中文](README.zh-CN.md)
 
-Plan user journeys, organize stories, and define release milestones inside Obsidian. Keep your map in your vault, link stories to Markdown notes, and export to XMind.
+Plan user journeys, break work into stories, and organize releases inside Obsidian. Keep maps alongside your project notes, attach reference files, and export your plan as PNG, PDF, XMind, or JSON.
 
-**[Download 1.4.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.4.1)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.5.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.5.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
-### 1.4.1
+## Updated interface preview
 
-Refined compact dialogs, two-column story forms and narrow layouts. Failed saves keep form input and retries do not duplicate new items. Independent `.storymap` files detect external changes and offer backup-and-reload recovery. Note renames and moves while the plugin is enabled update map links; missing linked notes are no longer silently recreated.
+The screenshots below show the next UI update, currently tested locally. Version **1.5.0** is the latest published release; the expanded Story color picker, always-visible properties, and labeled language selector shown here are not yet included in that release.
 
-### New in 1.4.0
+![Updated Story Map interface in Obsidian: milestone lanes, separate add-task space, a labeled language selector, and compact Story details with eight color presets](docs/images/obsidian-en.png)
 
-Right-click a folder → New story map, then choose a starter template or sample. Each map is an independent `.storymap` file containing JSON; legacy maps remain supported. Create activities, tasks, stories and milestones through dialogs. Click a milestone to edit it; milestones containing stories cannot be deleted. Search, select and unlink existing notes.
+*Actual Obsidian 1.13.7 screenshot with sample data. The file sidebar is hidden to keep the focus on the map.*
 
-![Story Map running in Obsidian with activities, tasks, milestone lanes, role labels, and the story details panel](docs/images/obsidian-en.png)
-
-*Captured in Obsidian 1.13.7 using sample data. New sample content follows the selected language; existing maps stay unchanged.*
+- **Compact Story details.** Descriptions grow with their text. Status, role, priority, estimate, tags, and linked notes are directly accessible without expanding “More properties.”
+- **Colors for Stories and Tasks.** Small swatches offer eight presets; Custom color accepts a color-picker choice or HEX value. Task colors can also return to the theme default.
+- **A visible language control.** The toolbar groups a language icon, a label, and the current selection. Choose Follow Obsidian or one of eight languages.
+- **Lightweight editing and attachments.** Story descriptions stay simple. Task and Activity descriptions provide basic rich-text editing; attachments appear as image thumbnails or compact filename chips.
 
 ## Features
 
-- Activity → Task → Story hierarchy with task columns and milestone lanes.
-- Add activities/tasks at the end of their groups; add stories below existing cards. Double-click to edit.
-- Create, edit, or delete roles. Each story can have one role or remain unassigned.
-- Manage milestones. Milestones containing stories cannot be deleted; empty tasks and activities can be deleted from the context menu.
+- Activity → Task → Story hierarchy, with tasks arranged across columns and stories grouped into milestone lanes.
+- Add tasks in a dedicated space at the end of each activity, without squeezing the story columns.
 - Drag stories between tasks and milestones or before another card to reorder them.
-- Floating details: status, priority, estimate, tags, description, and linked Markdown notes.
+- Assign roles, set status and priority, estimate effort, add tags, and link stories to Markdown notes.
+- Edit Task and Activity descriptions with headings, bold, italic, lists, checklists, quotes, links, and images. Formatting controls appear while editing.
+- Attach local or existing vault files to Stories, Tasks, and Activities.
 - Search, role filters, zoom, undo/redo, and preserved scroll position.
-- Eight interface languages: English, Simplified Chinese, Traditional Chinese, Japanese, Korean, German, French, and Spanish. Follow Obsidian automatically or choose manually.
-- Export dialog with PNG, PDF, XMind and JSON formats. XMind includes User journey, Release plan and Roles branches, with story details in topic notes.
-- Local saving with status, retry, and protection against overwriting unreadable data.
+- Create multiple independent `.storymap` files in any vault folder; older map formats remain supported.
+- Eight interface languages: English, Simplified Chinese, Traditional Chinese, Japanese, Korean, German, French, and Spanish.
+- Export PNG, PDF, XMind, or JSON, with save status, retry, and protection against overwriting unreadable map data.
 
-## Install
+## Install or update
 
 Requires Obsidian 1.8.10 or newer.
 
-1. Download `main.js`, `manifest.json`, and `styles.css` individually from [Releases](https://github.com/prohui/obsidian-story-map/releases/latest).
-2. Create `.obsidian/plugins/story-map/` in your vault and place the three files there.
-3. Enable Story Map in Obsidian's community plugin settings.
-4. Click the map ribbon icon or run the Open Story Map command.
+1. Download `main.js`, `manifest.json`, and `styles.css` from [Releases](https://github.com/prohui/obsidian-story-map/releases/latest).
+2. Place them in `.obsidian/plugins/story-map/` inside your vault.
+3. Enable **Story Map** in Obsidian → Settings → Community plugins.
+4. Click the map ribbon icon or run **Open Story Map** from the command palette.
 
-To update, replace the files and disable/re-enable the plugin. Map data is stored outside the plugin folder. Visit the [Obsidian community listing](https://community.obsidian.md/plugins/story-map) for the current review status and installation entry point.
+To update, replace those three files, then disable and re-enable the plugin. Map data is stored outside the plugin folder. The [Obsidian community page](https://community.obsidian.md/plugins/story-map) provides the community listing entry point.
 
-## Use and language
+## Create a map where your project lives
 
-Name the map, add activities, break them into tasks, and add stories within milestone lanes. Click a story to edit details or link a note. Manage roles and assign one to each story as needed. Drag cards to change their ordering or release scope.
+Right-click a folder in Obsidian's file explorer and choose **New story map**. Enter a name and choose a starter template or sample. The plugin creates an independent `.storymap` file in that folder. Open it from the file explorer like other vault files.
 
-The toolbar language selector supports Follow Obsidian and all eight languages. Changes take effect immediately and persist across reloads. Unsupported host languages fall back to English; Traditional Chinese locales are detected separately. New and explicitly reset sample maps use the current language. Changing the interface language never translates or overwrites an existing map.
+Name the map, add activities for journey stages, break each activity into tasks, and add stories within milestone lanes. Click a Story for its details; click a Task or Activity title to open its editor. Manage roles and milestones from the toolbar. Milestones containing stories cannot be deleted; empty tasks and activities can be deleted from their context menus.
 
-Click the export arrow to choose a format, then confirm. PNG is a full-map image; PDF embeds that image on one page (text is not searchable); XMind is an editable mind map; JSON is a complete data backup (no import interface yet). PNG/PDF use a clean light layout showing all activities, tasks, milestones and story cards, without controls or the inspector. Search, filters and zoom never limit the exported data. Very large maps exceeding the visual export safety limit must use XMind or JSON.
+## Descriptions, colors, and files
 
-Choose a format card, then use the system Save As dialog to choose the filename and location, including folders outside your vault. Only the selected file is written; cancelling does not export. The system handles overwrite confirmation and remembers the directory. The last successfully exported format is remembered. If the system picker is unavailable, files go to a localized vault folder such as `Story Map Exports/`, with numbered filenames to preserve existing files. Export labels follow the interface language; story content stays unchanged. Errors appear in the dialog and can be retried.
+**Stories:** click a card to edit its compact details. Use the **+** below the description to import a file from your computer or select an existing vault file. In the updated interface preview, use the small Story color swatches or expand **Custom color** for a picker and HEX input.
+
+**Tasks and Activities:** click the title to open the description editor. Use basic formatting and inline images to explain the work and its references. Paste or drag in images and files, or use **+** to add an attachment. Click **Save**, or press **Cmd/Ctrl + Enter**. Task colors are available in the Task editor; the preview expands the choices to eight presets and custom HEX colors.
+
+Imported Task and Activity attachments are saved immediately using Obsidian's attachment-location settings. Cancelling editing or removing a reference does not delete an imported file. Story imports are written when saved. Back up attachment files along with your maps: JSON and XMind exports contain references, not copies of the attached files.
+
+## Language
+
+Use the toolbar language menu; the updated preview makes it easy to find with an icon and a visible **Language** label. Choose **Follow Obsidian** or select a language manually. Changes apply immediately and persist across reloads.
+
+Interface labels change, while existing titles, descriptions, role names, and other user content keep their original language. Fresh sample maps use the selected language. Unsupported host languages fall back to English; Traditional Chinese locales are detected separately.
+
+## Export
+
+Click the export icon, choose a format, then select the filename and location in the system Save As dialog.
+
+| Format | Output |
+| --- | --- |
+| PNG | Full-map image in a clean light layout, without controls or the details panel. |
+| PDF | The full-map image on one page; text is not searchable. |
+| XMind | Editable User journey, Release plan, and Roles branches, with descriptions and file references in topic notes. |
+| JSON | Map data backup, including descriptions and attachment references; there is no JSON import interface yet. |
+
+Search, filters, and zoom do not limit the exported data. Very large maps beyond the visual export limit can use XMind or JSON. Cancelling the Save As dialog writes nothing. If the system picker is unavailable, exports go to a localized vault folder such as `Story Map Exports/`, using numbered filenames to preserve existing files. Failed exports can be retried.
 
 ## Data and compatibility
 
-- One map per vault, stored in `.story-map.json` at the vault root. Include it in backups.
-- The plugin makes no network requests. Linked Markdown notes remain readable without it.
-- Undo history lasts for the current session, up to 50 steps. Sync before editing on another device; simultaneous editing conflict resolution is not provided.
-- If saving fails, keep the plugin open, resolve disk/permission problems, and click Save. If loading fails, repair the map file and reload the plugin.
-- Release acceptance: macOS, Obsidian 1.8.10, XMind 26.04.01337. Desktop/narrow layouts, both languages, core editing flows, persistence, and opening exports were checked. Saving and reopening in XMind were also tested.
+- Each `.storymap` file contains JSON and can live anywhere in the vault. Legacy `.story-map.json` and `.story-maps/` maps remain supported.
+- Descriptions use Markdown. Linked notes remain normal Markdown files that can be read without the plugin.
+- The plugin makes no network requests of its own. Include map files, notes, and attachments in your vault backups.
+- While the plugin is enabled, note and folder renames update map links and supported attachment references.
+- Undo history lasts for the current session, up to 50 steps. Sync before editing on another device. External changes to independent maps are detected with backup-and-reload recovery; simultaneous edits are not automatically merged.
+- If saving fails, keep the plugin open, resolve the disk or permission problem, and retry Save. If loading fails, repair the map file before reloading.
 
 ## Development
 
@@ -69,9 +94,11 @@ npm ci
 npm test
 ```
 
-Tests include official Obsidian lint rules, TypeScript checks, production bundling, persistence regression tests, localization, and XMind structure checks. `npm run lint` runs the guidelines check separately. `npm run dev` watches for changes. Copy the built plugin files into a test vault to run it.
+Tests include Obsidian lint rules, TypeScript checks, production bundling, persistence, localization, colors, rich-text editing, attachments, and exports. `npm run dev` watches for changes. Copy the built plugin files into a test vault to run it.
 
-Translations are centralized in `src/i18n.ts`. User values are interpolated without modification. Contributions and additional translations are welcome. Include your Obsidian version, reproduction steps, and a non-private example when reporting an issue.
+Interface translations are in `src/i18n.ts` and `src/locales.ts`; editor translations are in `src/editor-labels.ts` and `src/editor-locales.ts`. Sample content is localized separately in `src/sample.ts`. Keep `README.en.md` in sync with this English README.
+
+Contributions and translations are welcome. When reporting an issue, include your Obsidian version, reproduction steps, and an example without private data.
 
 ## License
 
