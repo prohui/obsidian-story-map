@@ -47,6 +47,16 @@ To update, replace those three files, then disable and re-enable the plugin. Map
 
 Right-click a folder in Obsidian's file explorer and choose **New story map**. Enter a name and choose a starter template or sample. The plugin creates an independent `.storymap` file in that folder. Open it from the file explorer like other vault files.
 
+**1. Right-click the destination folder → New story map.** The example uses `Projects/Website/`. This feature is already available in 1.5.0.
+
+![Right-clicking the Website folder in Obsidian shows the New story map command](docs/images/create-map-context-zh.png)
+
+**2. Enter a map name, choose a starter template or sample, and click Create.** The map is saved inside the selected folder—for example, `Projects/Website/网站用户旅程.storymap`.
+
+![New story map dialog with a map name, template selector, and Create button](docs/images/create-map-dialog-zh.png)
+
+*These two screenshots use the Chinese Obsidian interface: 新建故事地图 = New story map, 轻量模板 = Starter template, 创建 = Create. Captured in a separate demo vault.*
+
 Name the map, add activities for journey stages, break each activity into tasks, and add stories within milestone lanes. Click a Story for its details; click a Task or Activity title to open its editor. Manage roles and milestones from the toolbar. Milestones containing stories cannot be deleted; empty tasks and activities can be deleted from their context menus.
 
 ## Descriptions, colors, and files

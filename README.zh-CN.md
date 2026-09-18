@@ -47,6 +47,16 @@
 
 在 Obsidian 文件列表中右键目标文件夹，选择“新建故事地图”，输入名称并选择轻量模板或完整示例。插件会在该文件夹内创建独立 `.storymap` 文件，之后可直接点击文件打开。
 
+**第一步：右键目标文件夹 → 新建故事地图。** 下图以 `Projects/Website/` 为例，1.5.0 已支持此功能。
+
+![右键 Website 文件夹，在菜单中选择“新建故事地图”](docs/images/create-map-context-zh.png)
+
+**第二步：输入名称，选择轻量模板或完整示例，点击“创建”。** 地图直接保存在所选文件夹中，例如 `Projects/Website/网站用户旅程.storymap`。
+
+![新建故事地图窗口：输入“网站用户旅程”，选择轻量模板并点击创建](docs/images/create-map-dialog-zh.png)
+
+*以上为独立示例库中的实际操作截图。*
+
 编辑地图名称，用 Activity 划分用户旅程阶段，为每个 Activity 添加 Task，再按里程碑添加 Story。点击 Story 打开详情，点击 Task 或 Activity 标题打开编辑器。顶部工具栏可以管理角色和里程碑。包含故事的里程碑不能删除；空 Task 和 Activity 可通过右键菜单删除。
 
 ## 描述、颜色与附件
