@@ -3,7 +3,7 @@
   "name": "Story Map",
   "version": "1.5.1",
   "minAppVersion": "1.8.10",
-  "description": "Plan user journeys with activities, tasks, stories, roles and milestones, link notes, and export to XMind.",
+  "description": "Map user journeys and plan releases with user story mapping. Keep local maps alongside project notes so humans and file-capable agents can work from the same plan.",
   "author": "Dahui",
   "isDesktopOnly": false,
   "fundingUrl": "https://ko-fi.com/hexhe"
