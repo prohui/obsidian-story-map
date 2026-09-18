@@ -2,9 +2,34 @@
 
 English · [Chinese](README.zh-CN.md)
 
-Plan user journeys, break work into stories, and organize releases inside Obsidian. Keep maps alongside your project notes, attach reference files, and export your plan as PNG, PDF, XMind, or JSON.
+**User story mapping for humans and agents, inside Obsidian.**
+
+Build a shared product plan: map the user journey, break it into activities and tasks, and organize user stories into release milestones. People work visually; agents with access to your vault can read and edit the underlying map files alongside your project notes.
 
 **[Download 1.5.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.5.1)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+
+## Why user story mapping in Obsidian?
+
+User story mapping connects the work you plan to the journey a user takes. Activities and tasks run horizontally across the map; stories sit beneath them in milestone lanes, making the scope of each release visible.
+
+Obsidian puts this plan in the same workspace as your requirements, research, and implementation notes. Each map is a local `.storymap` file containing JSON. The visual interface and a file-capable agent can work with the same plan, without copying it into a separate planning tool.
+
+## Working with an agent
+
+The integration is file-based. Bring your own agent and give it access to the relevant map and notes; Story Map does not include an AI agent, an agent API, or an MCP server.
+
+A suggested workflow:
+
+1. Create a map and link stories to relevant project notes.
+2. Ask your agent to read the map and those notes, identify gaps, and propose stories or acceptance criteria.
+3. Review the proposal, then have the agent update the file while preserving its structure, existing IDs, relationships, and unrelated content.
+4. Review the updated plan in Obsidian and adjust its release scope visually.
+
+For example, start with a read-only request:
+
+> Read `Projects/Website/Website journey.storymap` and its linked requirements notes. Identify missing stories in the sign-up journey and propose acceptance criteria. Do not change any files yet.
+
+Save your edits before handing the file to an agent, and avoid editing the same map simultaneously. The plugin detects external changes to open `.storymap` files and reloads them when there are no local changes or active detail editors. If edits conflict or a detail editor is open, it stops saving and offers a backup-and-reload flow; it does not automatically merge concurrent edits. This workflow depends on your agent's file access and ability to preserve the map format.
 
 ## Interface
 
