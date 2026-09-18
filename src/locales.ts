@@ -1,3 +1,5 @@
+import { editorDictionaries } from "./editor-locales";
+
 // Columns: source key, Traditional Chinese, Japanese, Korean, German, French, Spanish.
 const rows = `文件冲突|檔案衝突|ファイルの競合|파일 충돌|Dateikonflikt|Conflit de fichier|Conflicto de archivo
 备份并重新加载|備份並重新載入|バックアップして再読み込み|백업 후 다시 불러오기|Sichern und neu laden|Sauvegarder et recharger|Respaldar y recargar
@@ -188,3 +190,4 @@ for (const row of rows.split("\n")) {
   if (!key || values.length !== extraLocales.length || values.some(value => !value)) throw new Error("Invalid translation row");
   extraLocales.forEach((language, index) => { dictionaries[language][key] = values[index]!; });
 }
+extraLocales.forEach(language => { Object.assign(dictionaries[language], editorDictionaries[language]); });

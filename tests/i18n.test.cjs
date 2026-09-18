@@ -21,6 +21,23 @@ test('automatic language detection and interpolation preserve user-supplied cont
   setLocale('zh','en');assert.equal(t('保存'),'保存');
 });
 
+test('new editor controls follow the selected interface language',()=>{
+  const {t,setLocale}=translations();
+  const cases={
+    'zh-TW':['任務顏色','圖片與檔案'],
+    ja:['タスクの色','画像とファイル'],
+    ko:['작업 색상','이미지와 파일'],
+    de:['Aufgabenfarbe','Bilder und Dateien'],
+    fr:['Couleur de la tâche','Images et fichiers'],
+    es:['Color de la tarea','Imágenes y archivos'],
+  };
+  for(const [locale,[color,attachments]] of Object.entries(cases)){
+    setLocale(locale);
+    assert.equal(t('任务颜色'),color);
+    assert.equal(t('图片和文件'),attachments);
+  }
+});
+
 test('every locale covers every UI key with identical placeholders',()=>{
   const {english}=translations();
   const {dictionaries}=loadTs('locales');

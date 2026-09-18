@@ -1,26 +1,3 @@
-import { getLocale } from "./i18n";
-const labels: Record<string, string> = {
-  "更多属性": "More properties",
-  "活动详情": "Activity details", "添加活动": "Add activity", "活动名称": "Activity name", "任务名称": "Task name",
-  "描述": "Description", "直接输入内容，支持粘贴图片": "Write here or paste an image",
-  "段落": "Paragraph", "有序列表": "Numbered list", "引用": "Quote", "撤销": "Undo", "重做": "Redo",
-  "添加链接": "Add link", "应用": "Apply", "取消链接": "Remove link", "请输入有效的链接": "Enter a valid link",
-  "添加附件": "Add attachment", "库内文件": "Vault file", "暂无附件": "No attachments",
-  "添加参考图片、文档或依赖文件": "Add reference images, documents or dependencies",
-  "未保存": "Unsaved", "已保存": "Saved", "任务": "Task", "活动": "Activity",
-  "正在保存…": "Saving…",
-  "输入名称": "Enter a name", "图片": "Image", "关闭": "Close", "保存": "Save", "取消": "Cancel",
-  "图片仅支持库内文件或 HTTP(S) 地址": "Images must be vault files or HTTP(S) URLs",
-  "任务颜色": "Task color", "跟随主题": "Follow theme", "紫色": "Purple", "蓝色": "Blue", "绿色": "Green", "黄色": "Yellow", "橙色": "Orange", "粉色": "Pink",
-  "任务详情": "Task details", "正文": "Description", "编辑正文": "Edit description", "预览": "Preview",
-  "粗体": "Bold", "斜体": "Italic", "标题": "Heading", "列表": "List", "待办": "Checklist", "链接": "Link",
-  "图片和文件": "Images and files", "从电脑添加": "Import files", "选择库内文件": "Choose vault file",
-  "参考资料": "Reference", "依赖文件": "Dependency", "插入正文": "Insert in description", "打开文件": "Open file",
-  "移除附件关联": "Remove attachment link", "文件不存在": "File missing", "添加任务": "Add task",
-  "支持粘贴、拖入图片或文件；正文支持 Markdown。": "Paste or drop images and files; the description supports Markdown.",
-  "导入文件会立即保存在库中；取消编辑或移除关联不会删除文件。": "Imported files are saved to the vault immediately; cancelling or unlinking does not delete them.",
-  "暂无正文，点击编辑正文添加说明。": "No description yet. Choose Edit description to add one.",
-  "正在导入…": "Importing…", "操作失败，请重试": "Operation failed. Please retry.",
-  "附件用途": "Attachment purpose", "保存失败，请重试": "Save failed. Please retry.",
-};
-export function taskT(key: string): string { return getLocale().startsWith("zh") ? key : labels[key] || key; }
+import { t } from "./i18n";
+
+export function taskT(key: string): string { return t(key); }

@@ -61,3 +61,10 @@ test('relative Markdown images resolve vault files and keep their source after t
  await f.click(editor.querySelector('input[type="checkbox"]'));await f.click(f.button('保存'));
  assert.match(f.saved[0].description,/Assets\/reference%20image.png/);assert.match(f.saved[0].description,/- \[x\]/);await f.close();
 });
+
+test('custom Task colors reopen and save without losing the hex value',async()=>{
+ const f=await fixture('task',{id:'t',activityId:'a',title:'Custom',color:'#123456'});
+ assert.equal(f.container.querySelector('input[type="color"]').value,'#123456');
+ assert.ok(f.button('红色'));assert.ok(f.button('灰色'));
+ await f.click(f.button('保存'));assert.equal(f.saved[0].color,'#123456');await f.close();
+});

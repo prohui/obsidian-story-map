@@ -1,9 +1,9 @@
 import { t } from "./i18n";
 import type { Activity, Task, StoryMapData } from "./types";
-import { isTaskColor, taskColors } from "./task-colors";
+import { isTaskColor, colorBackground, colorInk } from "./task-colors";
 
 export type ExportFormat = "xmind" | "png" | "pdf" | "json";
-const colors = { lavender: "#eee5ff", yellow: "#fff0bd", blue: "#dfebff", green: "#e5f2d7" };
+
 const status = { idea: "想法", planned: "已规划", doing: "进行中", done: "已完成" };
 
 export function wrapText(context: CanvasRenderingContext2D, text: string, width: number): string[] {
@@ -49,8 +49,8 @@ export async function renderMap(data: StoryMapData, doc: Document): Promise<HTML
   if (width > 16000 || height > 16000 || width * height > 32000000) throw new Error(t("地图过大，请选择 XMind 或 JSON 导出"));
   canvas.width = width; canvas.height = height;
   ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, width, height);
-  const text = (value: string, x: number, y: number, w: number) => {
-    ctx.font = "16px sans-serif"; ctx.fillStyle = "#202124"; ctx.textBaseline = "top";
+  const text = (value: string, x: number, y: number, w: number, ink = "#202124") => {
+    ctx.font = "16px sans-serif"; ctx.fillStyle = ink; ctx.textBaseline = "top";
     wrapText(ctx, value, w).forEach((line, index) => ctx.fillText(line, x, y + index * 22));
   };
   const box = (x: number, y: number, w: number, h: number, color: string) => {
@@ -71,8 +71,8 @@ export async function renderMap(data: StoryMapData, doc: Document): Promise<HTML
   columns.forEach((c, index) => {
     const x = margin + gutter + index * colWidth;
     const taskColor = c.task?.color;
-    box(x + 4, y, colWidth - 8, taskHeight - 8, isTaskColor(taskColor) ? taskColors[taskColor].background : "#f3f4f6");
-    text(c.task?.title || "", x + 12, y + 12, colWidth - 24);
+    box(x + 4, y, colWidth - 8, taskHeight - 8, isTaskColor(taskColor) ? colorBackground(taskColor) : "#f3f4f6");
+    text(c.task?.title || "", x + 12, y + 12, colWidth - 24, colorInk(colorBackground(taskColor, "#f3f4f6")));
   });
   y += taskHeight;
   rows.forEach(({ release, height: rowHeight }) => {
@@ -84,8 +84,8 @@ export async function renderMap(data: StoryMapData, doc: Document): Promise<HTML
       let storyY = y + 12;
       storiesAt(c.task?.id, release.id).forEach(story => {
         const value = storyText(story), h = storyHeight(value);
-        box(x + 8, storyY, colWidth - 16, h, colors[story.color] || colors.lavender);
-        text(value, x + 20, storyY + 12, colWidth - 40); storyY += h + 12;
+        box(x + 8, storyY, colWidth - 16, h, colorBackground(story.color));
+        text(value, x + 20, storyY + 12, colWidth - 40, colorInk(story.color)); storyY += h + 12;
       });
     });
     y += rowHeight;

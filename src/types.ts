@@ -1,6 +1,7 @@
 export type StoryStatus = "idea" | "planned" | "doing" | "done";
-export type StoryColor = "lavender" | "blue" | "yellow" | "green";
-export type TaskColor = StoryColor | "pink" | "orange";
+export type PresetColor = "lavender" | "blue" | "yellow" | "green" | "pink" | "orange" | "red" | "gray";
+export type StoryColor = PresetColor | `#${string}`;
+export type TaskColor = StoryColor;
 
 export interface Story {
   id: string;

@@ -4,7 +4,7 @@ import { CheckOutlined, CloseOutlined, FileOutlined, FolderOpenOutlined, PaperCl
 import { FuzzySuggestModal, TFile, type App } from 'obsidian';
 import type { Activity, Task, TaskAttachment, TaskColor } from './types';
 import { taskT } from './editor-labels';
-import { isTaskColor, taskColors } from './task-colors';
+import { isTaskColor, taskColors, colorBackground, normalizeHex } from './task-colors';
 import { renameTaskFiles, taskImage } from './task-content';
 import { RichTextEditor, type RichTextHandle } from './rich-text-editor';
 
@@ -89,10 +89,13 @@ export function DetailEditorApp(props: DetailEditorProps) {
       <main className="sm-detail-body">
         <label className="sm-detail-label" htmlFor="sm-detail-name">{taskT(props.kind === 'task' ? '任务名称' : '活动名称')}</label>
         <Input autoFocus id="sm-detail-name" className="sm-detail-title-input" aria-label={taskT(props.kind === 'task' ? '任务名称' : '活动名称')} placeholder={taskT('输入名称')} value={title} disabled={busy} onChange={event => { setTitle(event.target.value); setDirty(true); }} />
-        {props.kind === 'task' && <div className="sm-detail-color-row"><span>{taskT('任务颜色')}</span><div role="group" aria-label={taskT('任务颜色')} className="sm-detail-colors">{[undefined, ...Object.keys(taskColors) as TaskColor[]].map(value => {
+        {props.kind === 'task' && <div className="sm-detail-color-row"><span>{taskT('任务颜色')}</span><div role="group" aria-label={taskT('任务颜色')} className="sm-detail-colors">{[undefined, ...Object.keys(taskColors) as Array<keyof typeof taskColors>].map(value => {
           const label = taskT(value ? taskColors[value].label : '跟随主题');
           return <Tooltip key={value || 'theme'} title={label}><Button className={`sm-detail-swatch ${value ? `story-map-task-tone-${value}` : 'sm-swatch-theme'}`} aria-label={label} aria-pressed={color === value} disabled={busy} icon={color === value ? <CheckOutlined /> : undefined} onClick={() => { setColor(value); setDirty(true); }} /></Tooltip>;
-        })}</div></div>}
+        })}</div><details className="story-map-custom-color"><summary>{taskT('自定义颜色')}</summary>
+          <input type="color" aria-label={taskT('自定义颜色')} value={colorBackground(color)} disabled={busy} onChange={event => { setColor(event.target.value as TaskColor); setDirty(true); }} />
+          <input key={color} aria-label="HEX" defaultValue={colorBackground(color)} placeholder="#RRGGBB" disabled={busy} onBlur={event => { const value = normalizeHex(event.target.value.trim()); event.target.setAttribute('aria-invalid', String(!value)); if (value) { setColor(value); setDirty(true); } }} />
+        </details></div>}
         <div className="sm-detail-section-heading"><label className="sm-detail-label">{taskT('描述')}</label></div>
         <RichTextEditor ref={rich} app={props.app} sourcePath={props.sourcePath} initial={props.entity.description || ''} disabled={busy} onChange={value => { description.current = value; setDirty(true); }} onFiles={files => { void importFiles(files); }} onImage={() => { if (fileInput.current) { fileInput.current.accept = 'image/*'; fileInput.current.click(); } }} />
         <section className="sm-detail-attachment-section">

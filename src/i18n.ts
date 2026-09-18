@@ -1,4 +1,5 @@
 import { dictionaries, type ExtraLocale } from "./locales";
+import { editorEnglish } from "./editor-locales";
 export type Locale = "zh" | "en" | ExtraLocale;
 export type Language = "auto" | Locale;
 export const languageNames: Record<Locale, string> = { en: "English", zh: "简体中文", "zh-TW": "繁體中文", ja: "日本語", ko: "한국어", de: "Deutsch", fr: "Français", es: "Español" };
@@ -79,6 +80,7 @@ export const english: Record<string, string> = {
   "关联笔记：{0}": "Linked note: {0}", "用户旅程": "User journey", "发布计划": "Release plan", "故事地图导出": "Story Map Exports",
   "用户故事地图": "User Story Map", "已导出 XMind：{0}": "XMind exported: {0}", "故事/{0}.md": "Stories/{0}.md",
   "语言": "Language", "跟随 Obsidian": "Follow Obsidian", "语言设置保存失败": "Could not save language preference", "验收标准": "Acceptance criteria",
+  ...editorEnglish,
 };
 
 export function t(key: string, ...values: Array<string | number>): string {

@@ -9,7 +9,36 @@ import { autoSizeDescription } from "./auto-size";
 import { ActivityEditorModal, TaskEditorModal, taskT } from "./task-editor";
 import { renderStoryAttachments } from "./story-attachments";
 import { renameTaskFiles } from "./task-content";
-import { isTaskColor } from "./task-colors";
+import { isTaskColor, taskColors, colorBackground, colorInk, normalizeHex } from "./task-colors";
+
+function storyColorPicker(parent: HTMLElement, current: Story["color"], change: (color: Story["color"]) => void): void {
+  const row = parent.createDiv("story-map-color-picker");
+  row.createSpan({ text: taskT("故事颜色") });
+  const choices = row.createDiv("story-map-color-choices");
+  choices.setAttribute("role", "group"); choices.setAttribute("aria-label", taskT("故事颜色"));
+  const colors = Object.keys(taskColors) as Array<keyof typeof taskColors>;
+  for (const color of colors) {
+    const label = taskT(taskColors[color].label);
+    const button = choices.createEl("button", { cls: `story-map-color-swatch color-${color}`, attr: { type: "button", "aria-label": label, title: label, "aria-pressed": String(current === color) } });
+    if (current === color) setIcon(button, "check");
+    button.onclick = () => {
+      choices.querySelectorAll("button").forEach(item => { item.setAttribute("aria-pressed", "false"); item.empty(); });
+      button.setAttribute("aria-pressed", "true"); setIcon(button, "check"); picker.value = colorBackground(color); hex.value = picker.value; change(color);
+    };
+  }
+  const custom = row.createEl("details", { cls: "story-map-custom-color" });
+  custom.createEl("summary", { text: taskT("自定义颜色") });
+  const picker = custom.createEl("input", { type: "color", value: colorBackground(current), attr: { "aria-label": taskT("自定义颜色") } });
+  const hex = custom.createEl("input", { type: "text", value: colorBackground(current), attr: { "aria-label": "HEX" } });
+  const clearSelection = () => choices.querySelectorAll("button").forEach(item => { item.setAttribute("aria-pressed", "false"); item.empty(); });
+  picker.onchange = () => { clearSelection(); hex.value = picker.value; change(picker.value as Story["color"]); };
+  hex.onchange = () => {
+    const value = normalizeHex(hex.value.trim());
+    hex.setAttribute("aria-invalid", String(!value));
+    if (value) { clearSelection(); picker.value = value; hex.value = value; change(value); }
+    else new Notice(taskT("请输入有效的 HEX 颜色"));
+  };
+}
 
 const VIEW_TYPE = "story-map-view";
 const DATA_PATH = ".story-map.json";
@@ -188,6 +217,13 @@ class NotePicker extends FuzzySuggestModal<TFile> {
   onChooseItem(file: TFile): void { this.choose(file.path); }
 }
 
+class StoryFilePicker extends FuzzySuggestModal<TFile> {
+  constructor(app: StoryMapPlugin["app"], private choose: (file: TFile) => void) { super(app); }
+  getItems(): TFile[] { return this.app.vault.getFiles(); }
+  getItemText(file: TFile): string { return file.path; }
+  onChooseItem(file: TFile): void { this.choose(file); }
+}
+
 function noteSelector(parent: HTMLElement, plugin: StoryMapPlugin, initial: string | undefined, change: (path: string | undefined) => void): void {
   let path = initial;
   const container = parent.createDiv("story-map-note-selector");
@@ -308,10 +344,14 @@ class CreateItemModal extends SavingModal {
 
 class StoryEditorModal extends SavingModal {
   private disposeDescription?: () => void;
+  private importedFiles: TFile[] = [];
+  private importing = false;
   constructor(private plugin: StoryMapPlugin, private story: Story, private saveStory?: (story: Story) => void) { super(plugin.app); }
   onOpen(): void {
     this.trackEditor(this.plugin);
     const { contentEl } = this;
+    this.containerEl.addClass("sm-detail-container");
+    this.modalEl.addClass("story-map-story-side-modal");
     contentEl.addClass("story-map-modal", "story-map-story-dialog");
     contentEl.createEl("h2", { text: this.saveStory ? t("添加故事") : t("编辑故事") });
     contentEl.createEl("p", { cls: "story-map-modal-help", text: [this.plugin.data.activities.find(item => item.id === this.story.activityId)?.title, this.plugin.data.tasks.find(item => item.id === this.story.taskId)?.title, this.plugin.data.releases.find(item => item.id === this.story.releaseId)?.title].filter(Boolean).join(" → ") });
@@ -326,6 +366,8 @@ class StoryEditorModal extends SavingModal {
       control.value = String(this.story[key] ?? ""); controls[key] = control;
       if (type === "textarea") this.disposeDescription = autoSizeDescription(control as HTMLTextAreaElement);
     });
+    let color = this.story.color;
+    storyColorPicker(contentEl, color, value => { color = value; });
     let notePath = this.story.notePath;
     const noteRow = contentEl.createDiv("story-map-form-row"); noteRow.createEl("label", { text: t("关联笔记") });
     noteSelector(noteRow, this.plugin, notePath, path => { notePath = path; });
@@ -347,6 +389,42 @@ class StoryEditorModal extends SavingModal {
     metadata.append(roleRow, statusRow, priorityRow);
     if (estimateRow) metadata.append(estimateRow);
     contentEl.append(noteRow, tagsRow);
+    if (controls.description?.parentElement) contentEl.append(controls.description.parentElement);
+    const attachmentRow = contentEl.createDiv("story-map-story-attachment-row");
+    attachmentRow.createEl("label", { text: taskT("图片和文件") });
+    const attachmentStrip = attachmentRow.createDiv("sm-story-attachments");
+    const attachments = (this.story.attachments || []).map(item => ({ ...item }));
+    const pending = new Set<File>();
+    const renderAttachments = (): void => {
+      attachmentStrip.empty();
+      for (const attachment of attachments) {
+        const file = this.plugin.app.vault.getAbstractFileByPath(attachment.path);
+        const name = attachment.path.split("/").pop() || attachment.path;
+        const chip = attachmentStrip.createDiv("sm-story-attachment");
+        chip.createSpan({ text: name, attr: { title: attachment.path } });
+        if (!(file instanceof TFile)) chip.createSpan({ text: taskT("文件不存在"), cls: "story-map-attachment-missing" });
+        const remove = chip.createEl("button", { text: "×", attr: { type: "button", "aria-label": `${taskT("移除附件关联")}: ${name}` } });
+        remove.onclick = () => { attachments.splice(attachments.indexOf(attachment), 1); renderAttachments(); };
+      }
+      for (const file of pending) {
+        const chip = attachmentStrip.createDiv("sm-story-attachment");
+        chip.createSpan({ text: file.name });
+        const remove = chip.createEl("button", { text: "×", attr: { type: "button", "aria-label": `${taskT("移除附件关联")}: ${file.name}` } });
+        remove.onclick = () => { pending.delete(file); renderAttachments(); };
+      }
+      const input = attachmentStrip.createEl("input", { type: "file", cls: "story-map-hidden" });
+      input.multiple = true;
+      input.onchange = () => { Array.from(input.files || []).forEach(file => pending.add(file)); renderAttachments(); };
+      const add = attachmentStrip.createEl("button", { text: "+", cls: "sm-story-attachment-add", attr: { type: "button", "aria-label": taskT("添加附件") } });
+      add.onclick = event => new Menu()
+        .addItem(item => item.setTitle(taskT("从电脑添加")).setIcon("upload").onClick(() => input.click()))
+        .addItem(item => item.setTitle(taskT("选择库内文件")).setIcon("folder").onClick(() => new StoryFilePicker(this.plugin.app, file => {
+          if (!attachments.some(item => item.path === file.path)) attachments.push({ path: file.path, kind: "reference" });
+          renderAttachments();
+        }).open()))
+        .showAtMouseEvent(event);
+    };
+    renderAttachments();
     const form = contentEl.createDiv("story-map-story-form");
     Array.from(contentEl.children).forEach(child => {
       if (child !== form && child.tagName !== "H2") form.append(child);
@@ -364,23 +442,50 @@ class StoryEditorModal extends SavingModal {
     const save = actions.createEl("button", { text: t("保存"), cls: "mod-cta" });
     save.disabled = !controls.title?.value.trim();
     if (controls.title) controls.title.oninput = () => { save.disabled = !controls.title?.value.trim(); };
-    save.onclick = () => {
+    save.onclick = async () => {
       if (!controls.title?.value.trim()) return;
-      void this.persist(this.plugin, () => {
+      this.importing = true;
+      save.disabled = true;
+      try {
+        for (const file of pending) {
+          const path = await this.plugin.app.fileManager.getAvailablePathForAttachment(file.name, this.plugin.mapPath);
+          const imported = await this.plugin.app.vault.createBinary(path, await file.arrayBuffer());
+          this.importedFiles.push(imported);
+          attachments.push({ path: imported.path, kind: "reference" });
+          pending.delete(file);
+        }
+        renderAttachments();
+        this.importing = false;
+        await this.persist(this.plugin, () => {
       this.story.title = controls.title?.value.trim() || t("未命名故事");
       this.story.description = controls.description?.value.trim() || "";
       this.story.estimate = Math.max(0, Number(controls.estimate?.value) || 0);
       this.story.notePath = notePath;
+      this.story.color = color;
       this.story.roleId = roleSelect.value || undefined;
       this.story.status = statusSelect.value as Story["status"];
       this.story.priority = prioritySelect.value as Story["priority"];
       this.story.tags = tagsInput.value.split(/[,，]/).map(item => item.trim()).filter(Boolean);
+      this.story.attachments = attachments.map(item => ({ ...item }));
       if (this.saveStory) this.saveStory(this.story);
-      });
+        });
+      } catch (cause) {
+        new Notice(`${taskT("操作失败，请重试")}: ${cause instanceof Error ? cause.message : String(cause)}`);
+      } finally {
+        this.importing = false;
+        save.disabled = !controls.title?.value.trim();
+      }
     };
     window.setTimeout(() => (controls.title as HTMLInputElement | undefined)?.select(), 0);
   }
-  onClose(): void { this.disposeDescription?.(); super.onClose(); this.contentEl.empty(); }
+  close(): void { if (!this.importing) super.close(); }
+  onClose(): void {
+    this.disposeDescription?.(); super.onClose(); this.contentEl.empty();
+    for (const file of this.importedFiles) {
+      const attached = this.plugin.data.stories.some(story => story.attachments?.some(item => item.path === file.path));
+      if (!attached) void this.plugin.app.fileManager.trashFile(file).catch(() => new Notice(taskT("操作失败，请重试")));
+    }
+  }
 }
 
 class StoryMapView extends FileView {
@@ -421,7 +526,12 @@ class StoryMapView extends FileView {
     title.onchange = () => { data.title = title.value; void this.plugin.commit(false); };
     const toolbar = header.createDiv("story-map-toolbar");
     if (!this.file) this.iconButton(toolbar, "folder-open", t("地图管理"), () => new MapsModal(this.plugin).open());
-    const language = toolbar.createEl("select", { cls: "story-map-language", attr: { "aria-label": t("语言") } });
+    const languageControl = toolbar.createDiv("story-map-language-control");
+    setIcon(languageControl.createSpan("story-map-language-icon"), "languages");
+    const languageLabel = languageControl.createEl("label", { text: t("语言") });
+    const language = languageControl.createEl("select", { cls: "story-map-language", attr: { "aria-label": t("语言") } });
+    language.id = uid("story-map-language");
+    languageLabel.htmlFor = language.id;
     [["auto", t("跟随 Obsidian")], ...Object.entries(languageNames)].forEach(([value, text]) => language.createEl("option", { value, text }));
     language.value = this.plugin.language;
     language.onchange = () => void this.plugin.changeLanguage(language.value as Language);
@@ -512,7 +622,7 @@ class StoryMapView extends FileView {
         return;
       }
       box.dataset.taskId = task.id;
-      if (isTaskColor(task.color)) box.addClass("story-map-task-colored", `story-map-task-tone-${task.color}`);
+      if (isTaskColor(task.color)) { box.addClass("story-map-task-colored"); box.style.setProperty("--task-accent", colorBackground(task.color)); }
       const taskName = box.createEl("button", { text: task.title, cls: "story-map-task-name", attr: { "aria-label": `${taskT("任务详情")}: ${task.title}` } });
       taskName.onclick = event => { event.stopPropagation(); new TaskEditorModal(this.plugin, task).open(); };
       if (task.description || task.attachments?.length) taskName.createSpan({ text: ` ▤${task.attachments?.length ? ` · ${task.attachments.length}` : ""}`, cls: "story-map-task-content-mark" });
@@ -569,6 +679,8 @@ class StoryMapView extends FileView {
 
   private renderStory(parent: HTMLElement, story: Story, task: Task, release: Release): void {
     const card = parent.createDiv(`story-map-card color-${story.color}${this.selectedId === story.id ? " is-selected" : ""}`);
+    card.style.setProperty("--story-background", colorBackground(story.color));
+    card.style.setProperty("--story-ink", colorInk(story.color));
     card.dataset.search = `${story.title} ${story.tags.join(" ")}`.toLowerCase(); card.dataset.roleId = story.roleId || "";
     card.draggable = true; card.ondragstart = e => e.dataTransfer?.setData("text/story-id", story.id);
     card.ondragover = e => { e.preventDefault(); e.stopPropagation(); card.addClass("is-insert-target"); };
@@ -608,11 +720,22 @@ class StoryMapView extends FileView {
     this.iconButton(heading, "x", t("关闭详情"), () => { this.inspectorOpen = false; this.render(); });
     if (!story) { panel.createDiv({ text: t("选择一张故事卡查看详情"), cls: "story-map-empty" }); return; }
     const title = panel.createEl("input", { value: story.title, cls: "story-map-inspector-title", attr: { "aria-label": t("故事标题"), title: story.title } }); title.onchange = () => { story.title = title.value.trim() || t("未命名故事"); void this.plugin.commit(); };
+    storyColorPicker(panel, story.color, color => {
+      void this.plugin.commitModal(() => { story.color = color; });
+    });
     this.selectField(panel, t("状态"), story.status, [["idea", t("想法")], ["planned", t("已规划")], ["doing", t("进行中")], ["done", t("已完成")]], v => { story.status = v as Story["status"]; });
     const roleField = this.field(panel, t("角色")); const roleChoices = roleField.createDiv("story-map-role-choices");
     const roleSelect = roleChoices.createEl("select", { attr: { "aria-label": t("Story 所属角色") } }); roleSelect.createEl("option", { value: "", text: t("未分配") });
     this.plugin.data.roles.forEach(role => roleSelect.createEl("option", { value: role.id, text: role.name })); roleSelect.value = story.roleId || "";
     roleSelect.onchange = () => { story.roleId = roleSelect.value || undefined; void this.plugin.commit(); };
+    const more = panel.createDiv("story-map-more-properties");
+    this.selectField(more, t("优先级"), story.priority, [["low", t("低")], ["medium", t("中")], ["high", t("高")]], v => { story.priority = v as Story["priority"]; });
+    const estimate = this.field(more, t("估点")).createEl("input", { type: "number", value: String(story.estimate), attr: { min: "0" } });
+    estimate.onchange = () => { story.estimate = Math.max(0, Number(estimate.value) || 0); void this.plugin.commit(); };
+    const tags = this.field(more, t("标签")).createEl("input", { value: story.tags.join(", ") }); tags.onchange = () => { story.tags = tags.value.split(/[,，]/).map(x => x.trim()).filter(Boolean); void this.plugin.commit(); };
+    noteSelector(this.field(more, t("关联笔记")), this.plugin, story.notePath, path => { story.notePath = path; void this.plugin.commit(); });
+    if (!story.notePath) more.createEl("button", { text: t("创建笔记") }).onclick = () => void this.plugin.openStoryNote(story);
+
     const descriptionRow = this.field(panel, t("描述"));
     descriptionRow.addClass("story-map-description-field");
     const desc = descriptionRow.createEl("textarea", { attr: { "aria-label": t("故事描述") } });
@@ -620,14 +743,6 @@ class StoryMapView extends FileView {
     this.disposeDescription = autoSizeDescription(desc);
     desc.onchange = () => { story.description = desc.value; void this.plugin.commit(); };
     renderStoryAttachments(panel, this.plugin, story);
-    const more = panel.createEl("details", { cls: "story-map-more-properties" });
-    more.createEl("summary", { text: taskT("更多属性") });
-    this.selectField(more, t("优先级"), story.priority, [["low", t("低")], ["medium", t("中")], ["high", t("高")]], v => { story.priority = v as Story["priority"]; });
-    const estimate = this.field(more, t("估点")).createEl("input", { type: "number", value: String(story.estimate), attr: { min: "0" } });
-    estimate.onchange = () => { story.estimate = Math.max(0, Number(estimate.value) || 0); void this.plugin.commit(); };
-    const tags = this.field(more, t("标签")).createEl("input", { value: story.tags.join(", ") }); tags.onchange = () => { story.tags = tags.value.split(/[,，]/).map(x => x.trim()).filter(Boolean); void this.plugin.commit(); };
-    noteSelector(this.field(more, t("关联笔记")), this.plugin, story.notePath, path => { story.notePath = path; void this.plugin.commit(); });
-    if (!story.notePath) more.createEl("button", { text: t("创建笔记") }).onclick = () => void this.plugin.openStoryNote(story);
 
   }
 
