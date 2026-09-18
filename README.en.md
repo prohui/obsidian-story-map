@@ -6,9 +6,9 @@ Plan user journeys, break work into stories, and organize releases inside Obsidi
 
 **[Download 1.5.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.5.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
-## Updated interface preview
+## Interface
 
-The screenshots below show the next UI update, currently tested locally. Version **1.5.0** is the latest published release; the expanded Story color picker, always-visible properties, and labeled language selector shown here are not yet included in that release.
+Plan on the map and edit details in a compact side panel. The screenshots show the current interface and the instructions below explain how to create a map in your project folder.
 
 ![Updated Story Map interface in Obsidian: milestone lanes, separate add-task space, a labeled language selector, and compact Story details with eight color presets](docs/images/obsidian-en.png)
 
@@ -18,6 +18,22 @@ The screenshots below show the next UI update, currently tested locally. Version
 - **Colors for Stories and Tasks.** Small swatches offer eight presets; Custom color accepts a color-picker choice or HEX value. Task colors can also return to the theme default.
 - **A visible language control.** The toolbar groups a language icon, a label, and the current selection. Choose Follow Obsidian or one of eight languages.
 - **Lightweight editing and attachments.** Story descriptions stay simple. Task and Activity descriptions provide basic rich-text editing; attachments appear as image thumbnails or compact filename chips.
+
+## Create a map where your project lives
+
+Right-click a folder in Obsidian's file explorer and choose **New story map**. Enter a name and choose a starter template or sample. The plugin creates an independent `.storymap` file in that folder. Open it from the file explorer like other vault files.
+
+**1. Right-click the destination folder → New story map.** You can create a map in any vault folder.
+
+![Obsidian folder context menu with New story map highlighted](docs/images/create-map-context-zh.png)
+
+**2. Enter a map name, choose a starter template or sample, and click Create.** The map is saved inside the selected folder—for example, `Projects/Website/网站用户旅程.storymap`.
+
+![New story map dialog with a map name, template selector, and Create button](docs/images/create-map-dialog-zh.png)
+
+*These two screenshots use the Chinese Obsidian interface: 新建故事地图 = New story map, 轻量模板 = Starter template, 创建 = Create. The creation dialog uses a demo project folder.*
+
+Name the map, add activities for journey stages, break each activity into tasks, and add stories within milestone lanes. Click a Story for its details; click a Task or Activity title to open its editor. Manage roles and milestones from the toolbar. Milestones containing stories cannot be deleted; empty tasks and activities can be deleted from their context menus.
 
 ## Features
 
@@ -43,33 +59,17 @@ Requires Obsidian 1.8.10 or newer.
 
 To update, replace those three files, then disable and re-enable the plugin. Map data is stored outside the plugin folder. The [Obsidian community page](https://community.obsidian.md/plugins/story-map) provides the community listing entry point.
 
-## Create a map where your project lives
-
-Right-click a folder in Obsidian's file explorer and choose **New story map**. Enter a name and choose a starter template or sample. The plugin creates an independent `.storymap` file in that folder. Open it from the file explorer like other vault files.
-
-**1. Right-click the destination folder → New story map.** The example uses `Projects/Website/`. This feature is already available in 1.5.0.
-
-![Right-clicking the Website folder in Obsidian shows the New story map command](docs/images/create-map-context-zh.png)
-
-**2. Enter a map name, choose a starter template or sample, and click Create.** The map is saved inside the selected folder—for example, `Projects/Website/网站用户旅程.storymap`.
-
-![New story map dialog with a map name, template selector, and Create button](docs/images/create-map-dialog-zh.png)
-
-*These two screenshots use the Chinese Obsidian interface: 新建故事地图 = New story map, 轻量模板 = Starter template, 创建 = Create. Captured in a separate demo vault.*
-
-Name the map, add activities for journey stages, break each activity into tasks, and add stories within milestone lanes. Click a Story for its details; click a Task or Activity title to open its editor. Manage roles and milestones from the toolbar. Milestones containing stories cannot be deleted; empty tasks and activities can be deleted from their context menus.
-
 ## Descriptions, colors, and files
 
-**Stories:** click a card to edit its compact details. Use the **+** below the description to import a file from your computer or select an existing vault file. In the updated interface preview, use the small Story color swatches or expand **Custom color** for a picker and HEX input.
+**Stories:** click a card to edit its compact details. Use the **+** below the description to import a file from your computer or select an existing vault file. Use the small Story color swatches or expand **Custom color** for a picker and HEX input.
 
-**Tasks and Activities:** click the title to open the description editor. Use basic formatting and inline images to explain the work and its references. Paste or drag in images and files, or use **+** to add an attachment. Click **Save**, or press **Cmd/Ctrl + Enter**. Task colors are available in the Task editor; the preview expands the choices to eight presets and custom HEX colors.
+**Tasks and Activities:** click the title to open the description editor. Use basic formatting and inline images to explain the work and its references. Paste or drag in images and files, or use **+** to add an attachment. Click **Save**, or press **Cmd/Ctrl + Enter**. Task colors are available in the Task editor; choose from eight presets or enter a custom HEX color.
 
 Imported Task and Activity attachments are saved immediately using Obsidian's attachment-location settings. Cancelling editing or removing a reference does not delete an imported file. Story imports are written when saved. Back up attachment files along with your maps: JSON and XMind exports contain references, not copies of the attached files.
 
 ## Language
 
-Use the toolbar language menu; the updated preview makes it easy to find with an icon and a visible **Language** label. Choose **Follow Obsidian** or select a language manually. Changes apply immediately and persist across reloads.
+Use the toolbar language menu; look for the icon and visible **Language** label. Choose **Follow Obsidian** or select a language manually. Changes apply immediately and persist across reloads.
 
 Interface labels change, while existing titles, descriptions, role names, and other user content keep their original language. Fresh sample maps use the selected language. Unsupported host languages fall back to English; Traditional Chinese locales are detected separately.
 
