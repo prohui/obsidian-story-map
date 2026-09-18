@@ -120,8 +120,8 @@
 .story-map-task .story-map-add-task-after { position:static; flex-shrink:0; }
 .story-map-activity-name:hover,.story-map-task-name:hover { background:var(--background-modifier-hover); border-radius:3px; }
 .story-map-story-column > .story-map-inline-input { min-height:82px; background:var(--background-secondary); }
-.modal:has(.story-map-compact-dialog),.modal:has(.story-map-story-dialog) { border-radius:12px; padding:24px; width:min(440px,calc(100vw - 32px)); max-height:calc(100vh - 48px); }
-.modal:has(.story-map-story-dialog) { width:min(620px,calc(100vw - 32px)); }
+.modal.story-map-compact-modal,.modal.story-map-story-side-modal { border-radius:12px; padding:24px; width:min(440px,calc(100vw - 32px)); max-height:calc(100vh - 48px); }
+.modal.story-map-story-side-modal { width:min(620px,calc(100vw - 32px)); }
 .story-map-compact-dialog,.story-map-story-dialog { margin:0; padding:0; }
 .story-map-compact-dialog h2,.story-map-story-dialog h2 { margin:0 32px 20px 0; font-size:20px; line-height:1.3; font-weight:650; }
 .story-map-modal.story-map-story-dialog .story-map-modal-help { margin:-10px 0 20px; overflow-wrap:anywhere; font-size:11px; }
@@ -136,7 +136,7 @@
 .story-map-note-selector { display:flex; gap:8px; flex-wrap:wrap; }
 .story-map-note-selector button { min-height:34px; }
 .story-map-note-selector button:first-child { flex:1 1 180px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
-@media(max-width:480px) { .story-map-dialog-metadata { grid-template-columns:1fr; } .modal:has(.story-map-story-dialog),.modal:has(.story-map-compact-dialog) { padding:18px; } }
+@media(max-width:480px) { .story-map-dialog-metadata { grid-template-columns:1fr; } .modal.story-map-story-side-modal,.modal.story-map-compact-modal { padding:18px; } }
 
 /* Scroll the form, keeping the heading and actions outside the scroll area. */
 .story-map-modal.story-map-story-dialog { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
@@ -149,7 +149,7 @@
 .story-map-description-field textarea { padding:10px; }
 .story-map-task button.story-map-task-name { display:block; width:100%; height:auto; padding:0; white-space:normal; color:inherit; font:inherit; border:0; background:transparent; box-shadow:none; cursor:pointer; }
 .story-map-task-content-mark { font-size:9px; color:var(--text-muted); white-space:nowrap; }
-.story-map-hidden { display:none !important; }
+input[type="file"].story-map-hidden { display:none; }
 .story-map-task-tone-lavender { --task-accent:#9775fa; }
 .story-map-task-tone-blue { --task-accent:#4d9aee; }
 .story-map-task-tone-green { --task-accent:#6daf50; }
@@ -229,7 +229,7 @@
 .sm-rich-document li[data-type="taskItem"] > label { flex:0 0 auto; padding-top:2px; }
 .sm-rich-document li[data-type="taskItem"] > div { flex:1; min-width:0; }
 .sm-rich-document input[type="checkbox"] { width:14px; height:14px; margin:0; }
-.sm-rich-document:has(> p:only-child > br:only-child)::before { content:attr(data-placeholder); position:absolute; pointer-events:none; color:var(--text-faint); font-size:13px; }
+.sm-rich-document[data-empty="true"]::before { content:attr(data-placeholder); position:absolute; pointer-events:none; color:var(--text-faint); font-size:13px; }
 .sm-detail-file-actions { display:flex; gap:4px; }
 .sm-detail-count { display:inline-block; min-width:18px; margin-left:4px; padding:0 4px; background:var(--background-secondary); border-radius:8px; font-size:10px; text-align:center; }
 .sm-detail-empty { display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px dashed var(--background-modifier-border); border-radius:6px; color:var(--text-faint); font-size:12px; }
@@ -268,8 +268,8 @@
 .sm-detail-root input.sm-ant-input:focus { border-color:var(--interactive-accent); box-shadow:0 0 0 2px var(--background-modifier-border-focus); }
 
 /* Keep the story form at the same application density as Task and Activity. */
-.modal:has(.story-map-story-dialog) { padding:16px; }
-.modal:has(.story-map-story-dialog) > .modal-header { display:none; }
+.modal.story-map-story-side-modal { padding:16px; }
+.modal.story-map-story-side-modal > .modal-header { display:none; }
 .story-map-story-dialog h2 { font-size:16px; margin-bottom:16px; }
 .story-map-modal.story-map-story-dialog .story-map-modal-help { margin:0 0 12px; }
 .story-map-story-dialog input,.story-map-story-dialog select { height:30px; }

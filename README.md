@@ -4,7 +4,7 @@ English · [Chinese](README.zh-CN.md)
 
 Plan user journeys, break work into stories, and organize releases inside Obsidian. Keep maps alongside your project notes, attach reference files, and export your plan as PNG, PDF, XMind, or JSON.
 
-**[Download 1.5.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.5.0)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
+**[Download 1.5.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.5.1)** · [Report an issue](https://github.com/prohui/obsidian-story-map/issues) · [MIT License](LICENSE)
 
 ## Interface
 

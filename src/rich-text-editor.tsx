@@ -64,7 +64,7 @@ export const RichTextEditor = forwardRef<RichTextHandle, Props>((props, ref) => 
       extensions: [StarterKit.configure({ heading: { levels: [2, 3] }, link: { openOnClick: false, protocols: ['storymap-vault'], isAllowedUri: url => !!allowedLink(url) } }), VaultImage, TaskList, TaskItem.configure({ nested: true, HTMLAttributes: { 'data-type': 'taskItem' }, a11y: { checkboxLabel: node => node.textContent || taskT('待办') } }), Markdown],
       content: toEditorMarkdown(props.initial), contentType: 'markdown',
       editorProps: {
-        attributes: { class: 'sm-rich-document', role: 'textbox', 'aria-multiline': 'true', 'aria-label': taskT('描述'), 'data-placeholder': taskT('直接输入内容，支持粘贴图片') },
+        attributes: state => ({ class: 'sm-rich-document', role: 'textbox', 'aria-multiline': 'true', 'aria-label': taskT('描述'), 'data-placeholder': taskT('直接输入内容，支持粘贴图片'), 'data-empty': String(state.doc.childCount === 1 && state.doc.firstChild?.type.name === 'paragraph' && state.doc.firstChild.content.size === 0) }),
         handlePaste: (_view, event) => {
           const files = Array.from(event.clipboardData?.files || []);
           if (!files.length) return false;

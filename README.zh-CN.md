@@ -4,7 +4,7 @@
 
 在 Obsidian 中规划用户旅程、拆分故事和安排发布里程碑。地图可以放在项目笔记旁边，关联参考文件，并导出为 PNG、PDF、XMind 或 JSON。
 
-**[下载 1.5.0](https://github.com/prohui/obsidian-story-map/releases/tag/1.5.0)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
+**[下载 1.5.1](https://github.com/prohui/obsidian-story-map/releases/tag/1.5.1)** · [反馈问题](https://github.com/prohui/obsidian-story-map/issues) · [MIT 许可证](LICENSE)
 
 ## 界面与操作
 

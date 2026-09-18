@@ -39,7 +39,7 @@ test('Task renders a real contenteditable editor; colors save and theme reset pr
 
 test('Activity supports WYSIWYG image paste, attachments, and save retry without duplication',async()=>{
  const f=await fixture('activity',{id:'a',title:'Activity',description:'## 目标\n\n说明'});
- const editor=f.container.querySelector('[contenteditable="true"]');assert.ok(editor);assert.equal(f.button('蓝色'),undefined);
+ const editor=f.container.querySelector('[contenteditable="true"]');assert.ok(editor);assert.equal(editor.getAttribute('data-empty'),'false');assert.equal(f.button('蓝色'),undefined);
  const paste=new Event('paste',{bubbles:true,cancelable:true});Object.defineProperty(paste,'clipboardData',{value:{getData:()=>'',files:[{name:'reference.png',arrayBuffer:async()=>new Uint8Array([1,2]).buffer}]}});
  await ui.act(async()=>{editor.dispatchEvent(paste);await tick();});assert.equal(paste.defaultPrevented,true);assert.equal(f.writes.length,1);assert.ok(editor.querySelector('img'));assert.equal(editor.lastElementChild.tagName,'P','a paragraph remains after an imported image for continued typing');
  f.fail=true;await f.click(f.button('保存'));assert.equal(f.closed,false);assert.equal(f.busy,false);assert.match(f.container.textContent,/保存失败/);
@@ -50,7 +50,7 @@ test('existing file embeds and task checkboxes round trip as editable content; c
  const f=await fixture('task',{id:'t',activityId:'a',title:'Task',description:'- [ ] 验收\n\n![[Assets/mock.png]]',attachments:[]});
  const editor=f.container.querySelector('[contenteditable="true"]');assert.ok(editor.querySelector('img'));assert.ok(editor.querySelector('input[type="checkbox"]'));
  await f.click(editor.querySelector('input[type="checkbox"]'));await f.click(f.button('保存'));assert.match(f.saved[0].description,/- \[x\]/);assert.match(f.saved[0].description,/!\[\[Assets\/mock.png\]\]/);await f.close();
- const cancelled=await fixture('activity',{id:'a',title:'A'});await cancelled.click(cancelled.button('取消'));assert.equal(cancelled.saved.length,0);assert.equal(cancelled.closed,true);await cancelled.close();
+ const cancelled=await fixture('activity',{id:'a',title:'A'});assert.equal(cancelled.container.querySelector('[contenteditable="true"]').getAttribute('data-empty'),'true');await cancelled.click(cancelled.button('取消'));assert.equal(cancelled.saved.length,0);assert.equal(cancelled.closed,true);await cancelled.close();
 });
 
 

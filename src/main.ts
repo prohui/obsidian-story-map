@@ -42,7 +42,7 @@ function storyColorPicker(parent: HTMLElement, current: Story["color"], change: 
 
 const VIEW_TYPE = "story-map-view";
 const DATA_PATH = ".story-map.json";
-const PLUGIN_VERSION = "1.5.0";
+const PLUGIN_VERSION = "1.5.1";
 const STATUS_LABELS: Record<Story["status"], string> = { idea: "想法", planned: "已规划", doing: "进行中", done: "已完成" };
 const PRIORITY_LABELS: Record<Story["priority"], string> = { low: "低", medium: "中", high: "高" };
 
@@ -242,6 +242,7 @@ function noteSelector(parent: HTMLElement, plugin: StoryMapPlugin, initial: stri
 class ConflictModal extends Modal {
   constructor(private plugin: StoryMapPlugin) { super(plugin.app); }
   onOpen(): void {
+    this.modalEl.addClass("story-map-compact-modal");
     this.contentEl.addClass("story-map-modal", "story-map-compact-dialog");
     this.contentEl.createEl("h2", { text: t("文件冲突") });
     this.contentEl.createEl("p", { text: t("保留双方版本：先将当前地图另存为副本，再加载磁盘版本。") });
@@ -284,6 +285,7 @@ class MilestoneEditorModal extends SavingModal {
   constructor(private plugin: StoryMapPlugin, private release: Release) { super(plugin.app); }
   onOpen(): void {
     this.trackEditor(this.plugin);
+    this.modalEl.addClass("story-map-compact-modal");
     this.contentEl.addClass("story-map-modal", "story-map-compact-dialog");
     this.contentEl.createEl("h2", { text: t("里程碑管理") });
     const field = (caption: string, value: string): HTMLInputElement => {
@@ -320,6 +322,7 @@ class CreateItemModal extends SavingModal {
   constructor(private plugin: StoryMapPlugin, private heading: string, private save: (title: string, description: string) => void, private context = "", private description = false) { super(plugin.app); }
   onOpen(): void {
     this.trackEditor(this.plugin);
+    this.modalEl.addClass("story-map-compact-modal");
     this.contentEl.addClass("story-map-modal", "story-map-compact-dialog"); this.contentEl.createEl("h2", { text: this.heading });
     if (this.context) this.contentEl.createEl("p", { text: this.context, cls: "story-map-modal-help" });
     const nameRow = this.contentEl.createDiv("story-map-form-row");
