@@ -1,6 +1,6 @@
 # Obsidian Story Map · 故事地图
 
-[English](README.md) · 简体中文
+[English](README.md) · 简体中文 · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md)
 
 **在 Obsidian 中，让人和 agent 围绕同一份用户故事地图协作。**
 
@@ -131,7 +131,7 @@ npm test
 
 测试覆盖 Obsidian 规范检查、TypeScript 检查、生产构建、持久化、多语言、颜色、富文本、附件和导出。`npm run dev` 启动构建监听；将构建后的插件文件复制到测试 Vault 即可运行。
 
-界面翻译位于 `src/i18n.ts` 和 `src/locales.ts`，编辑器翻译位于 `src/editor-labels.ts` 和 `src/editor-locales.ts`，示例内容单独在 `src/sample.ts` 中翻译。英文 `README.md` 与 `README.en.md` 保持同步。
+界面翻译位于 `src/i18n.ts` 和 `src/locales.ts`，编辑器翻译位于 `src/editor-labels.ts` 和 `src/editor-locales.ts`，示例内容单独在 `src/sample.ts` 中翻译。以英文 `README.md` 为文档基准，`README.en.md` 与其保持一致；功能变更时同步更新八种语言文档的对应章节。每种语言文档使用对应语言的 Obsidian 界面、插件界面与示例地图截图；界面变更时同步更新截图和图注。
 
 欢迎提交翻译和功能改进。反馈问题时请附 Obsidian 版本、复现步骤和不含私人数据的示例。
 

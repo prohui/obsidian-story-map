@@ -1,6 +1,6 @@
 # Obsidian Story Map
 
-English · [Chinese](README.zh-CN.md)
+English · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md)
 
 **User story mapping for humans and agents, inside Obsidian.**
 
@@ -131,7 +131,7 @@ npm test
 
 Tests include Obsidian lint rules, TypeScript checks, production bundling, persistence, localization, colors, rich-text editing, attachments, and exports. `npm run dev` watches for changes. Copy the built plugin files into a test vault to run it.
 
-Interface translations are in `src/i18n.ts` and `src/locales.ts`; editor translations are in `src/editor-labels.ts` and `src/editor-locales.ts`. Sample content is localized separately in `src/sample.ts`. Keep `README.en.md` in sync with this English README.
+Interface translations are in `src/i18n.ts` and `src/locales.ts`; editor translations are in `src/editor-labels.ts` and `src/editor-locales.ts`. Sample content is localized separately in `src/sample.ts`. Use this English `README.md` as the documentation reference and keep `README.en.md` identical. When features change, update the corresponding sections in all eight language editions. Each language edition uses screenshots of the matching Obsidian interface, plugin interface, and sample map content. Keep screenshots and captions in sync when the interface changes.
 
 Contributions and translations are welcome. When reporting an issue, include your Obsidian version, reproduction steps, and an example without private data.
 
